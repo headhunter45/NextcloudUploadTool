@@ -105,12 +105,12 @@ This document defines the complete project roadmap and task tracking system for 
 Create the initial repository layout for the project, including the shared Rust backend library, CLI tool, and Tauri GUI application. This establishes the monorepo structure and build configuration.
 
 **Requirements:**  
-- [ ] Create root-level Cargo workspace  
-- [ ] Create `nextcloud_client/` Rust crate  
-- [ ] Create `cli/` Rust crate  
+- [x] Create root-level Cargo workspace  
+- [x] Create `nextcloud_client/` Rust crate  
+- [x] Create `cli/` Rust crate  
 - [ ] Create `gui/` Tauri project  
-- [ ] Add `.editorconfig` and `.gitignore`  
-- [ ] Add README with project overview  
+- [x] Add `.editorconfig` and `.gitignore`  
+- [x] Add README with project overview  
 
 **Dependencies:**  
 None
