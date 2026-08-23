@@ -49,188 +49,51 @@ task-types:
 
 # Nextcloud Upload Tool — Project Plan
 
-This document defines the full project plan for the **Nextcloud Upload Tool**, including the CLI and GUI applications, shared backend library, credential system, and packaging/distribution.
-
-It follows the same conventions as your existing monorepo task system:
-
-- Anchor tags are the **single source of truth** for task ID, status, and type  
-- The summary table is a rendered view of the detailed tasks  
-- Task dependencies are direct-only  
-- IDs follow the format: `${project.prefix}-XXX` → `NUT-001`, `NUT-002`, etc.
+This document defines the complete project roadmap and task tracking system for the **Nextcloud Upload Tool**, encompassing the CLI and GUI applications, shared backend library, credential storage, and distribution packaging.
 
 ---
 
-Here’s the clean, unrendered **Notes / Directions for Agents & Users** section you asked for — formatted exactly like the style in your old Tasks.md, but adapted for your new single‑project document.
+## Task Management Quick Guide
 
-Every line is prefixed with `%` so you can copy/paste safely.  
-You can append this block **just before the Rendered Task Statuses section** in your file.
-
----
-
-## Task System Documentation (Requirements for Agents)
-
-This section defines how agents and contributors must interpret, update, and maintain this Tasks.md file.  
-It mirrors the conventions of the original multi‑project Tasks.md, adapted for a single‑project workflow.
-
-### **Single Source of Truth (SSOT)**
-
-- The **anchor tag** for each task is the SSOT for:
-  - **Task ID** → from the `id` attribute  
-  - **Task Status** → from the `data-status` attribute  
-  - **Task Type** → from the `data-task-type` attribute  
-
-- The **Detailed Task section** is the SSOT for:
-  - Task title  
-  - Task description  
-  - Requirements checklist  
-  - Dependencies  
-
-- The **Tasks Summary table** is a *rendered view* of the SSOT.  
-  It must be updated whenever SSOT attributes or task details change.
-
-### **Rendered Sections**
-
-Sections marked with **“(Rendered from …)”** are generated from frontmatter or SSOT data.  
-These sections must be updated whenever:
-- A task is added  
-- A task’s ID, status, or type changes  
-- A task type or status is added/removed/renamed in frontmatter  
-
-Rendered sections include:
-- Tasks Summary table  
-- Task Statuses table  
-- Task Types table  
-
-These sections should never be manually edited except to regenerate them.
-
-### **Task Identification**
-
-- Every task begins with an anchor tag of the form:
-  ```
-  <a id="nut-001" class="task" data-status="pending" data-task-type="foundation"></a>
-  ```
-- The `id` attribute must match the task’s ID in the summary table.
-- The `class="task"` attribute identifies the start of a detailed task section.
-
-### **Task ID Format**
-
-- All task IDs follow the format:  
-  **`${project.prefix}-XXX`**  
-  where `XXX` is a zero‑padded, monotonic 3‑digit number.
-
-- IDs must never be reused or renumbered.  
-  New tasks always append the next available number.
-
-### **Task Lifecycle**
-
-Tasks follow this lifecycle:
-
-1. **Triage** — Initial state; incomplete information allowed  
-2. **Pending** — Ready for implementation  
-3. **In Progress** — Work is actively being done  
-4. **Fixed / Done** — Work completed  
-5. **Blocked** — Cannot proceed due to external dependency  
-6. **Cancelled** — No longer relevant or intentionally discarded  
-
-### **Adding New Tasks**
-
-When adding a new task:
-
-1. Create a new anchor tag with the next available ID  
-2. Add a detailed task section immediately after the anchor  
-3. Update the Tasks Summary table  
-4. Ensure the task is placed in numeric order in the detailed list  
-
-### **Missing Task Details**
-
-If a task appears in the Tasks Summary table **without** a corresponding detailed section:
-
-- Create a new detailed section for it  
-- Insert it in numeric order  
-- Use placeholder text if requirements are unknown  
-
-### **Dependencies**
-
-- Only **direct dependencies** should be listed  
-- Avoid listing transitive dependencies  
-- Dependencies must reference task IDs exactly  
-
-### **Frontmatter Rules**
-
-- The `project` section is the SSOT for:
-  - Project name  
-  - Project ID  
-  - Task prefix  
-
-- The `task-statuses` and `task-types` sections define the SSOT for:
-  - Allowed status values  
-  - Allowed type values  
-  - Their labels  
-  - Their descriptions  
-
-- Rendered tables must reflect these values exactly.
-
-### **Agent Responsibilities**
-
-Agents modifying this file must:
-
-- Update rendered sections when SSOT changes  
-- Maintain numeric ordering of detailed tasks  
-- Ensure anchor tags remain valid and consistent  
-- Preserve the frontmatter structure  
-- Avoid altering IDs or removing tasks  
-- Add missing detailed sections when needed  
-
-### **User Responsibilities**
-
-- Users should modify only the detailed task sections when changing requirements  
-- Users should not manually edit rendered tables except to regenerate them  
-- Users should avoid renumbering tasks or altering IDs  
-
-### **General Formatting Rules**
-
-- All checklists use GitHub-style `[ ]` / `[x]` syntax  
-- All anchor tags appear directly above their task’s heading  
-- All headings use `###` for task titles  
-- All rendered tables use pipes (`|`) and must align with SSOT  
-- All tasks must include a **Description**, **Requirements**, and **Dependencies** section  
+> [!IMPORTANT]
+> **For Agents & Contributors:**
+> - **Anchor Tags as SSOT**: The HTML anchor tag `<a id="..." class="task" data-status="..." data-task-type="..."></a>` above each task heading is the single source of truth (SSOT) for ID, status, and task type.
+> - **Task Details as SSOT**: The detailed task body is the SSOT for title, description, requirements checklist, and direct dependencies.
+> - **Rendered Sections**: The [Tasks Summary](#tasks-summary) table and the bottom enum tables ([Task Statuses](#task-statuses) & [Task Types](#task-types)) are rendered views that must be synchronized whenever SSOT data changes.
+> - **Full Documentation**: Review the complete rules, schemas, and contributor workflows in [Task System Documentation & Rules](#task-system-rules) before editing or restructuring tasks.
 
 ---
-
-
 
 <a id="tasks-summary"></a>
-## Tasks Summary
+## Tasks Summary (Rendered from task details)
 
-| ID       | Title                                           | Status      | Type        |
-|----------|--------------------------------------------------|-------------|-------------|
-| NUT-001  | Establish Repository Structure                   | Pending     | Foundation  |
-| NUT-002  | Implement Shared Rust Backend Library            | Triage      | Foundation  |
-| NUT-003  | Implement WebDAV Upload Logic                    | Triage      | Feature     |
-| NUT-004  | Implement OCS Share Link Generation              | Triage      | Feature     |
-| NUT-005  | Implement Direct Download URL Builder            | Triage      | Feature     |
-| NUT-006  | Implement Credential Storage System              | Triage      | Feature     |
-| NUT-007  | Implement Multi-Account Support (Backend)        | Triage      | Feature     |
-| NUT-008  | Implement CLI Frontend                           | Triage      | Feature     |
-| NUT-009  | Implement CLI Output Formatting Options          | Triage      | Feature     |
-| NUT-010  | Implement CLI Multi-file Upload Support          | Triage      | Feature     |
-| NUT-011  | Implement CLI Progress Reporting + pv Support    | Triage      | Feature     |
-| NUT-012  | Implement GUI (Tauri) Frontend                   | Triage      | Feature     |
-| NUT-013  | Implement GUI File Queue + Drag-and-Drop         | Triage      | Feature     |
-| NUT-014  | Implement GUI Credential Management UI           | Triage      | Feature     |
-| NUT-015  | Implement GUI Upload Progress Bars               | Triage      | Feature     |
-| NUT-016  | Implement Shared Auth Token Reuse                | Triage      | Integration |
-| NUT-017  | Implement Multi-Account Switching (GUI + CLI)    | Triage      | Integration |
-| NUT-018  | Implement Packaging for macOS, Windows, Linux    | Triage      | Chore       |
-| NUT-019  | Implement Homebrew/Winget/Chocolatey Manifests   | Triage      | Chore       |
-| NUT-020  | Write Documentation + Examples                   | Triage      | Chore       |
+| ID | Title | Status | Type |
+|---|---|---|---|
+| [NUT-001](#nut-001) | Establish Repository Structure | Pending | Foundation |
+| [NUT-002](#nut-002) | Implement Shared Rust Backend Library | Triage | Foundation |
+| [NUT-003](#nut-003) | Implement WebDAV Upload Logic | Triage | Feature |
+| [NUT-004](#nut-004) | Implement OCS Share Link Generation | Triage | Feature |
+| [NUT-005](#nut-005) | Implement Direct Download URL Builder | Triage | Feature |
+| [NUT-006](#nut-006) | Implement Credential Storage System | Triage | Feature |
+| [NUT-007](#nut-007) | Implement Multi-Account Support (Backend) | Triage | Feature |
+| [NUT-008](#nut-008) | Implement CLI Frontend | Triage | Feature |
+| [NUT-009](#nut-009) | Implement CLI Output Formatting Options | Triage | Feature |
+| [NUT-010](#nut-010) | Implement CLI Multi-file Upload Support | Triage | Feature |
+| [NUT-011](#nut-011) | Implement CLI Progress Reporting + pv Support | Triage | Feature |
+| [NUT-012](#nut-012) | Implement GUI (Tauri) Frontend | Triage | Feature |
+| [NUT-013](#nut-013) | Implement GUI File Queue + Drag-and-Drop | Triage | Feature |
+| [NUT-014](#nut-014) | Implement GUI Credential Management UI | Triage | Feature |
+| [NUT-015](#nut-015) | Implement GUI Upload Progress Bars | Triage | Feature |
+| [NUT-016](#nut-016) | Implement Shared Auth Token Reuse | Triage | Integration |
+| [NUT-017](#nut-017) | Implement Multi-Account Switching (GUI + CLI) | Triage | Integration |
+| [NUT-018](#nut-018) | Implement Packaging for macOS, Windows, Linux | Triage | Chore |
+| [NUT-019](#nut-019) | Implement Homebrew/Winget/Chocolatey Manifests | Triage | Chore |
+| [NUT-020](#nut-020) | Write Documentation + Examples | Triage | Chore |
 
 ---
 
 <a id="task-details"></a>
 ## Detailed Tasks
-
----
 
 <a id="nut-001" class="task" data-status="pending" data-task-type="foundation"></a>
 ### Establish Repository Structure  
@@ -252,7 +115,6 @@ Create the initial repository layout for the project, including the shared Rust 
 **Dependencies:**  
 None
 
----
 
 <a id="nut-002" class="task" data-status="triage" data-task-type="foundation"></a>
 ### Implement Shared Rust Backend Library  
@@ -273,7 +135,6 @@ Implement the shared Rust library that provides all core functionality: WebDAV u
 **Dependencies:**  
 - NUT-001
 
----
 
 <a id="nut-003" class="task" data-status="triage" data-task-type="feature"></a>
 ### Implement WebDAV Upload Logic  
@@ -293,7 +154,6 @@ Implement file upload using Nextcloud’s WebDAV API. Support streaming uploads,
 **Dependencies:**  
 - NUT-002
 
----
 
 <a id="nut-004" class="task" data-status="triage" data-task-type="feature"></a>
 ### Implement OCS Share Link Generation  
@@ -313,7 +173,6 @@ Implement creation of public share links using the OCS Sharing API.
 **Dependencies:**  
 - NUT-002
 
----
 
 <a id="nut-005" class="task" data-status="triage" data-task-type="feature"></a>
 ### Implement Direct Download URL Builder  
@@ -332,7 +191,6 @@ Generate direct-download URLs from share tokens.
 **Dependencies:**  
 - NUT-004
 
----
 
 <a id="nut-006" class="task" data-status="triage" data-task-type="feature"></a>
 ### Implement Credential Storage System  
@@ -353,7 +211,6 @@ Implement secure credential storage using OS keychain when available, falling ba
 **Dependencies:**  
 - NUT-002
 
----
 
 <a id="nut-007" class="task" data-status="triage" data-task-type="feature"></a>
 ### Implement Multi-Account Support (Backend)  
@@ -372,7 +229,6 @@ Support multiple Nextcloud accounts in the backend credential system.
 **Dependencies:**  
 - NUT-006
 
----
 
 <a id="nut-008" class="task" data-status="triage" data-task-type="feature"></a>
 ### Implement CLI Frontend  
@@ -395,7 +251,6 @@ Implement the CLI tool using the shared backend library.
 - NUT-005  
 - NUT-006
 
----
 
 <a id="nut-009" class="task" data-status="triage" data-task-type="feature"></a>
 ### Implement CLI Output Formatting Options  
@@ -409,13 +264,12 @@ Add output formatting options for scripting and automation.
 **Requirements:**  
 - [ ] JSON output  
 - [ ] TSV output  
-- [ ] Flags for path/filename/url  
+- [ ] Flags for path/filename/url    
 - [ ] Quiet mode  
 
 **Dependencies:**  
 - NUT-008
 
----
 
 <a id="nut-010" class="task" data-status="triage" data-task-type="feature"></a>
 ### Implement CLI Multi-file Upload Support  
@@ -434,7 +288,6 @@ Support uploading multiple files in a single CLI invocation.
 **Dependencies:**  
 - NUT-008
 
----
 
 <a id="nut-011" class="task" data-status="triage" data-task-type="feature"></a>
 ### Implement CLI Progress Reporting + pv Support  
@@ -454,7 +307,6 @@ Integrate with `pv` for progress reporting and support streaming uploads.
 - NUT-003  
 - NUT-008
 
----
 
 <a id="nut-012" class="task" data-status="triage" data-task-type="feature"></a>
 ### Implement GUI (Tauri) Frontend  
@@ -467,7 +319,7 @@ Implement the Tauri-based GUI application.
 
 **Requirements:**  
 - [ ] Create window layout  
-- [ ] Connect Rust backend  
+- [ ] Connect Rust backend    
 - [ ] Implement basic upload UI  
 
 **Dependencies:**  
@@ -477,7 +329,6 @@ Implement the Tauri-based GUI application.
 - NUT-005  
 - NUT-006
 
----
 
 <a id="nut-013" class="task" data-status="triage" data-task-type="feature"></a>
 ### Implement GUI File Queue + Drag-and-Drop  
@@ -496,7 +347,6 @@ Add drag-and-drop file support and a queue system for multiple uploads.
 **Dependencies:**  
 - NUT-012
 
----
 
 <a id="nut-014" class="task" data-status="triage" data-task-type="feature"></a>
 ### Implement GUI Credential Management UI  
@@ -517,7 +367,6 @@ Add UI for managing accounts, logging in, logging out, and switching accounts.
 - NUT-007  
 - NUT-012
 
----
 
 <a id="nut-015" class="task" data-status="triage" data-task-type="feature"></a>
 ### Implement GUI Upload Progress Bars  
@@ -538,7 +387,6 @@ Add per-file and total progress bars to the GUI.
 - NUT-012  
 - NUT-013
 
----
 
 <a id="nut-016" class="task" data-status="triage" data-task-type="integration"></a>
 ### Implement Shared Auth Token Reuse  
@@ -559,7 +407,6 @@ Ensure both CLI and GUI reuse the same credential store and cached tokens.
 - NUT-008  
 - NUT-012
 
----
 
 <a id="nut-017" class="task" data-status="triage" data-task-type="integration"></a>
 ### Implement Multi-Account Switching (GUI + CLI)  
@@ -580,7 +427,6 @@ Add multi-account switching to both CLI and GUI.
 - NUT-008  
 - NUT-014
 
----
 
 <a id="nut-018" class="task" data-status="triage" data-task-type="chore"></a>
 ### Implement Packaging for macOS, Windows, Linux  
@@ -601,7 +447,6 @@ Package the CLI and GUI for distribution.
 - NUT-008  
 - NUT-012
 
----
 
 <a id="nut-019" class="task" data-status="triage" data-task-type="chore"></a>
 ### Implement Homebrew/Winget/Chocolatey Manifests  
@@ -621,7 +466,6 @@ Add package manager manifests for easy installation.
 **Dependencies:**  
 - NUT-018
 
----
 
 <a id="nut-020" class="task" data-status="triage" data-task-type="chore"></a>
 ### Write Documentation + Examples  
@@ -645,12 +489,74 @@ Write documentation for installation, usage, examples, and API reference.
 
 ---
 
-## Rendered Task Statuses
-| Value       | Label       | Description                                                                                 |
-|-------------|-------------|---------------------------------------------------------------------------------------------|
-| triage      | Triage      | The task is being evaluated and prioritized. It may still be missing important information. |
-| pending     | Pending     | The task is ready to be acted on.                                                           |
-| in_progress | In Progress | The task is currently being worked on.                                                      |
-| done        | Fixed       | The task has been completed.                                                                |
-| blocked     | Blocked     | The task cannot proceed due to an obstacle or dependency.                                   |
-| cancelled   | Cancelled   | The task was decided against or is no longer relevant.                                      |
+<a id="task-system-rules"></a>
+## Task System Documentation & Rules
+
+This section defines how contributors and AI agents must interpret, update, and maintain this `Tasks.md` file.
+
+### Single Source of Truth (SSOT)
+
+- **Task Anchor Tag**: The HTML anchor tag directly above each task title is the SSOT for machine-readable attributes:
+  - **Task ID**: `id` attribute (lowercase, e.g. `id=\"nut-001\"`)
+  - **Task Status**: `data-status` attribute (must match a value in `task-statuses` frontmatter)
+  - **Task Type**: `data-task-type` attribute (must match a value in `task-types` frontmatter)
+- **Detailed Task Section**: The markdown text under the task heading is the SSOT for human-readable content:
+  - Task title (`### Title`)
+  - Task ID label (`**ID:** NUT-XXX`)
+  - Task status label (`**Status:** ...`)
+  - Task type label (`**Type:** ...`)
+  - Description, Requirements checklist (`- [ ] ...`), and Dependencies.
+- **Rendered Sections**: Tables marked as `(Rendered from ...)` are non-canonical views generated from frontmatter and task anchor/detail sections.
+
+### Task Lifecycle & Status Values
+
+Tasks progress through defined statuses:
+1. `triage`: Under initial evaluation and specification. Missing requirements allowed.
+2. `pending`: Scope defined and ready for active work.
+3. `in_progress`: Active implementation in progress.
+4. `done`: Work complete, requirements checked, and verified.
+5. `blocked`: Blocked by an external obstacle or unmet dependency.
+6. `cancelled`: Deprecated or abandoned.
+
+### Formatting & Identification Invariants
+
+- **Task ID Schema**: `${project.prefix}-XXX` where `XXX` is a zero-padded monotonic 3-digit number (e.g. `NUT-001`).
+- IDs must be monotonic and never renumbered or reused.
+- Anchor IDs are lowercase: `<a id="nut-001" class="task" data-status="pending" data-task-type="foundation"></a>`.
+- Table and header IDs are uppercase: `[NUT-001](#nut-001)`.
+- Dependencies list **direct dependencies only** (no transitive dependencies).
+- Checklists must use standard GitHub Markdown `- [ ]` and `- [x]`.
+- Spacing: Use two blank lines between detailed task blocks. Horizontal rules (`---`) are reserved for separating major top-level sections.
+
+### Maintenance Procedures
+
+- **Adding a Task**: Append the next sequential ID, create the anchor tag and detailed section separated by two blank lines, and add the row to [Tasks Summary](#tasks-summary).
+- **Updating Status/Type**: Update the `data-status` and `data-task-type` attributes in the task anchor tag, the text fields in the task detail section, and the corresponding row in [Tasks Summary](#tasks-summary).
+- **Modifying Enums**: Any changes to available statuses or types must originate in the YAML frontmatter (`task-statuses` / `task-types`) and be re-rendered into the corresponding reference tables below.
+
+---
+
+<a id="task-statuses"></a>
+## Task Statuses (Rendered from task-statuses)
+
+| Value | Label | Description |
+|---|---|---|
+| `triage` | Triage | The task is being evaluated and prioritized. It may still be missing important information. |
+| `pending` | Pending | The task is ready to be acted on. |
+| `in_progress` | In Progress | The task is currently being worked on. |
+| `done` | Fixed | The task has been completed. |
+| `blocked` | Blocked | The task cannot proceed due to an obstacle or dependency. |
+| `cancelled` | Cancelled | The task was decided against or is no longer relevant. |
+
+---
+
+<a id="task-types"></a>
+## Task Types (Rendered from task-types)
+
+| Value | Prefix | Label | Description |
+|---|---|---|---|
+| `foundation` | FND | Foundation | Core project setup, repo structure, build system, and shared libraries. |
+| `feature` | FEA | Feature | A new feature to implement. |
+| `bug` | BUG | Bug | A defect or incorrect behavior to fix. |
+| `chore` | CHR | Chore | Routine maintenance or cleanup work. |
+| `integration` | INT | Integration | Connecting components together or integrating external systems. |
