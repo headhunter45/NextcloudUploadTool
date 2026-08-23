@@ -69,7 +69,7 @@ This document defines the complete project roadmap and task tracking system for 
 
 | ID | Title | Status | Type |
 |---|---|---|---|
-| [NUT-001](#nut-001) | Establish Repository Structure | Pending | Foundation |
+| [NUT-001](#nut-001) | Establish Repository Structure | In Progress | Foundation |
 | [NUT-002](#nut-002) | Implement Shared Rust Backend Library | Triage | Foundation |
 | [NUT-003](#nut-003) | Implement WebDAV Upload Logic | Triage | Feature |
 | [NUT-004](#nut-004) | Implement OCS Share Link Generation | Triage | Feature |
@@ -95,10 +95,10 @@ This document defines the complete project roadmap and task tracking system for 
 <a id="task-details"></a>
 ## Detailed Tasks
 
-<a id="nut-001" class="task" data-status="pending" data-task-type="foundation"></a>
+<a id="nut-001" class="task" data-status="in_progress" data-task-type="foundation"></a>
 ### Establish Repository Structure  
 **ID:** NUT-001  
-**Status:** Pending  
+**Status:** In Progress  
 **Type:** Foundation  
 
 **Description:**  
@@ -522,7 +522,7 @@ Tasks progress through defined statuses:
 
 - **Task ID Schema**: `${project.prefix}-XXX` where `XXX` is a zero-padded monotonic 3-digit number (e.g. `NUT-001`).
 - IDs must be monotonic and never renumbered or reused.
-- Anchor IDs are lowercase: `<a id="nut-001" class="task" data-status="pending" data-task-type="foundation"></a>`.
+- Anchor IDs are lowercase: `<a id=\"nut-001\" class=\"task\" data-status=\"pending\" data-task-type=\"foundation\"></a>`.
 - Table and header IDs are uppercase: `[NUT-001](#nut-001)`.
 - Dependencies list **direct dependencies only** (no transitive dependencies).
 - Checklists must use standard GitHub Markdown `- [ ]` and `- [x]`.

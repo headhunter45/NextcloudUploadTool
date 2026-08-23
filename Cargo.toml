@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "nextcloud_client",
+    "cli",
+]
+resolver = "3"
