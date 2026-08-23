@@ -2,5 +2,6 @@
 members = [
     "nextcloud_client",
     "cli",
+    "gui/src-tauri",
 ]
 resolver = "3"

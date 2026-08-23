@@ -69,7 +69,7 @@ This document defines the complete project roadmap and task tracking system for 
 
 | ID | Title | Status | Type |
 |---|---|---|---|
-| [NUT-001](#nut-001) | Establish Repository Structure | In Progress | Foundation |
+| [NUT-001](#nut-001) | Establish Repository Structure | Fixed | Foundation |
 | [NUT-002](#nut-002) | Implement Shared Rust Backend Library | Triage | Foundation |
 | [NUT-003](#nut-003) | Implement WebDAV Upload Logic | Triage | Feature |
 | [NUT-004](#nut-004) | Implement OCS Share Link Generation | Triage | Feature |
@@ -95,10 +95,10 @@ This document defines the complete project roadmap and task tracking system for 
 <a id="task-details"></a>
 ## Detailed Tasks
 
-<a id="nut-001" class="task" data-status="in_progress" data-task-type="foundation"></a>
+<a id="nut-001" class="task" data-status="done" data-task-type="foundation"></a>
 ### Establish Repository Structure  
 **ID:** NUT-001  
-**Status:** In Progress  
+**Status:** Fixed  
 **Type:** Foundation  
 
 **Description:**  
@@ -108,7 +108,7 @@ Create the initial repository layout for the project, including the shared Rust 
 - [x] Create root-level Cargo workspace  
 - [x] Create `nextcloud_client/` Rust crate  
 - [x] Create `cli/` Rust crate  
-- [ ] Create `gui/` Tauri project  
+- [x] Create `gui/` Tauri project  
 - [x] Add `.editorconfig` and `.gitignore`  
 - [x] Add README with project overview  
 
