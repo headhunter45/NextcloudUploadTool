@@ -75,7 +75,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-004](#nut-004) | Implement OCS Share Link Generation | Fixed | Feature |
 | [NUT-005](#nut-005) | Implement Direct Download URL Builder | Fixed | Feature |
 | [NUT-006](#nut-006) | Implement Credential Storage System | Fixed | Feature |
-| [NUT-007](#nut-007) | Implement Multi-Account Support (Backend) | Triage | Feature |
+| [NUT-007](#nut-007) | Implement Multi-Account Support (Backend) | Fixed | Feature |
 | [NUT-008](#nut-008) | Implement CLI Frontend | Triage | Feature |
 | [NUT-009](#nut-009) | Implement CLI Output Formatting Options | Triage | Feature |
 | [NUT-010](#nut-010) | Implement CLI Multi-file Upload Support | Triage | Feature |
@@ -213,19 +213,19 @@ Implement secure credential storage using OS keychain when available, falling ba
 - NUT-002
 
 
-<a id="nut-007" class="task" data-status="triage" data-task-type="feature"></a>
+<a id="nut-007" class="task" data-status="done" data-task-type="feature"></a>
 ### Implement Multi-Account Support (Backend)  
 **ID:** NUT-007  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Feature  
 
 **Description:**  
 Support multiple Nextcloud accounts in the backend credential system.
 
 **Requirements:**  
-- [ ] Add account list structure  
-- [ ] Add default account selection  
-- [ ] Add account switching API  
+- [x] Add account list structure  
+- [x] Add default account selection  
+- [x] Add account switching API  
 
 **Dependencies:**  
 - NUT-006
