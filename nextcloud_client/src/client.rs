@@ -1,9 +1,12 @@
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
 use serde::{Deserialize, Serialize};
+use std::path::Path;
 use url::Url;
 
 use crate::config::ClientConfig;
 use crate::error::{NextcloudError, Result};
+use crate::models::{UploadOptions, UploadResult};
+use crate::progress::ProgressCallback;
 
 /// Response payload from Nextcloud's `/status.php` endpoint.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -132,6 +135,35 @@ impl NextcloudClient {
 
         let status = response.json::<ServerStatus>().await?;
         Ok(status)
+    }
+
+    /// High-level orchestration method that uploads a file from disk and optionally generates a public share link.
+    pub async fn upload_and_share<P: AsRef<Path>>(
+        &self,
+        local_path: P,
+        options: &UploadOptions,
+        progress: Option<ProgressCallback>,
+    ) -> Result<UploadResult> {
+        let bytes_uploaded = self
+            .upload_file(local_path, &options.remote_path, progress)
+            .await?;
+
+        let (share_url, direct_download_url) = if options.create_share {
+            let share = self
+                .create_public_share(&options.remote_path, options.share_password.as_deref())
+                .await?;
+            let direct = self.direct_download_url(&share.token)?.to_string();
+            (Some(share.url), Some(direct))
+        } else {
+            (None, None)
+        };
+
+        Ok(UploadResult {
+            remote_path: options.remote_path.clone(),
+            bytes_uploaded,
+            share_url,
+            direct_download_url,
+        })
     }
 }
 

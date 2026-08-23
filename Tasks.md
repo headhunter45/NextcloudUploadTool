@@ -72,7 +72,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-001](#nut-001) | Establish Repository Structure | Fixed | Foundation |
 | [NUT-002](#nut-002) | Implement Shared Rust Backend Library | Fixed | Foundation |
 | [NUT-003](#nut-003) | Implement WebDAV Upload Logic | Fixed | Feature |
-| [NUT-004](#nut-004) | Implement OCS Share Link Generation | Triage | Feature |
+| [NUT-004](#nut-004) | Implement OCS Share Link Generation | Fixed | Feature |
 | [NUT-005](#nut-005) | Implement Direct Download URL Builder | Triage | Feature |
 | [NUT-006](#nut-006) | Implement Credential Storage System | Triage | Feature |
 | [NUT-007](#nut-007) | Implement Multi-Account Support (Backend) | Triage | Feature |
@@ -155,20 +155,20 @@ Implement file upload using Nextcloud’s WebDAV API. Support streaming uploads,
 - NUT-002
 
 
-<a id="nut-004" class="task" data-status="triage" data-task-type="feature"></a>
+<a id="nut-004" class="task" data-status="done" data-task-type="feature"></a>
 ### Implement OCS Share Link Generation  
 **ID:** NUT-004  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Feature  
 
 **Description:**  
 Implement creation of public share links using the OCS Sharing API.
 
 **Requirements:**  
-- [ ] POST to `/ocs/v2.php/apps/files_sharing/api/v1/shares`  
-- [ ] Parse JSON/XML response  
-- [ ] Extract share token  
-- [ ] Return share metadata  
+- [x] POST to `/ocs/v2.php/apps/files_sharing/api/v1/shares`  
+- [x] Parse JSON/XML response  
+- [x] Extract share token  
+- [x] Return share metadata  
 
 **Dependencies:**  
 - NUT-002
