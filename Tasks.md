@@ -70,7 +70,7 @@ This document defines the complete project roadmap and task tracking system for 
 | ID | Title | Status | Type |
 |---|---|---|---|
 | [NUT-001](#nut-001) | Establish Repository Structure | Fixed | Foundation |
-| [NUT-002](#nut-002) | Implement Shared Rust Backend Library | Triage | Foundation |
+| [NUT-002](#nut-002) | Implement Shared Rust Backend Library | Fixed | Foundation |
 | [NUT-003](#nut-003) | Implement WebDAV Upload Logic | Triage | Feature |
 | [NUT-004](#nut-004) | Implement OCS Share Link Generation | Triage | Feature |
 | [NUT-005](#nut-005) | Implement Direct Download URL Builder | Triage | Feature |
@@ -116,21 +116,21 @@ Create the initial repository layout for the project, including the shared Rust 
 None
 
 
-<a id="nut-002" class="task" data-status="triage" data-task-type="foundation"></a>
+<a id="nut-002" class="task" data-status="done" data-task-type="foundation"></a>
 ### Implement Shared Rust Backend Library  
 **ID:** NUT-002  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Foundation  
 
 **Description:**  
 Implement the shared Rust library that provides all core functionality: WebDAV upload, OCS share creation, credential storage, and progress callbacks. This library is used by both the CLI and GUI.
 
 **Requirements:**  
-- [ ] Create `NextcloudClient` struct  
-- [ ] Implement async runtime setup  
-- [ ] Define error types  
-- [ ] Define configuration structs  
-- [ ] Provide high-level API for upload + share  
+- [x] Create `NextcloudClient` struct  
+- [x] Implement async runtime setup  
+- [x] Define error types  
+- [x] Define configuration structs  
+- [x] Provide high-level API for upload + share  
 
 **Dependencies:**  
 - NUT-001
@@ -199,9 +199,10 @@ Generate direct-download URLs from share tokens.
 **Type:** Feature  
 
 **Description:**  
-Implement secure credential storage using OS keychain when available, falling back to encrypted config files.
+Implement secure credential storage using OS keychain when available, falling back to encrypted config files. Support Nextcloud Login Flow v2 (`/index.php/login/v2`) for browser-based interactive authentication (supporting 2FA/SSO) alongside manual app password entry.
 
 **Requirements:**  
+- [ ] Implement Nextcloud Login Flow v2 client (initiate + browser open + polling)  
 - [ ] macOS Keychain support  
 - [ ] Windows Credential Manager support  
 - [ ] Linux Secret Service support  
@@ -237,9 +238,10 @@ Support multiple Nextcloud accounts in the backend credential system.
 **Type:** Feature  
 
 **Description:**  
-Implement the CLI tool using the shared backend library.
+Implement the CLI tool using the shared backend library, including interactive browser login via Login Flow v2 and file upload commands.
 
 **Requirements:**  
+- [ ] Add `login` command (browser-based Login Flow v2)  
 - [ ] Add `upload` command  
 - [ ] Add `--account` flag  
 - [ ] Add `--stdin` support  
@@ -355,11 +357,12 @@ Add drag-and-drop file support and a queue system for multiple uploads.
 **Type:** Feature  
 
 **Description:**  
-Add UI for managing accounts, logging in, logging out, and switching accounts.
+Add UI for managing accounts, logging in (including one-click browser authorization via Login Flow v2), logging out, and switching accounts.
 
 **Requirements:**  
 - [ ] Account list UI  
-- [ ] Login form  
+- [ ] Browser-based login button (Login Flow v2)  
+- [ ] Manual login form (server/user/token)  
 - [ ] Logout button  
 - [ ] Switch account dropdown  
 
@@ -497,7 +500,7 @@ This section defines how contributors and AI agents must interpret, update, and 
 ### Single Source of Truth (SSOT)
 
 - **Task Anchor Tag**: The HTML anchor tag directly above each task title is the SSOT for machine-readable attributes:
-  - **Task ID**: `id` attribute (lowercase, e.g. `id=\"nut-001\"`)
+  - **Task ID**: `id` attribute (lowercase, e.g. `id="nut-001"`)
   - **Task Status**: `data-status` attribute (must match a value in `task-statuses` frontmatter)
   - **Task Type**: `data-task-type` attribute (must match a value in `task-types` frontmatter)
 - **Detailed Task Section**: The markdown text under the task heading is the SSOT for human-readable content:
@@ -522,7 +525,7 @@ Tasks progress through defined statuses:
 
 - **Task ID Schema**: `${project.prefix}-XXX` where `XXX` is a zero-padded monotonic 3-digit number (e.g. `NUT-001`).
 - IDs must be monotonic and never renumbered or reused.
-- Anchor IDs are lowercase: `<a id=\"nut-001\" class=\"task\" data-status=\"pending\" data-task-type=\"foundation\"></a>`.
+- Anchor IDs are lowercase: `<a id="nut-001" class="task" data-status="pending" data-task-type="foundation"></a>`.
 - Table and header IDs are uppercase: `[NUT-001](#nut-001)`.
 - Dependencies list **direct dependencies only** (no transitive dependencies).
 - Checklists must use standard GitHub Markdown `- [ ]` and `- [x]`.

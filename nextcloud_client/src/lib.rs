@@ -1,14 +1,15 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+//! # Nextcloud Client Library
+//!
+//! A high-performance, asynchronous Rust library for interacting with Nextcloud's
+//! WebDAV file transfer APIs, OCS Sharing API, and credential storage.
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub mod client;
+pub mod config;
+pub mod error;
+pub mod models;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+// Convenient top-level re-exports
+pub use client::{NextcloudClient, ServerStatus};
+pub use config::{AccountCredentials, ClientConfig};
+pub use error::{NextcloudError, Result};
+pub use models::{UploadOptions, UploadResult};
