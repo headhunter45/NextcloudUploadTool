@@ -74,7 +74,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-003](#nut-003) | Implement WebDAV Upload Logic | Fixed | Feature |
 | [NUT-004](#nut-004) | Implement OCS Share Link Generation | Fixed | Feature |
 | [NUT-005](#nut-005) | Implement Direct Download URL Builder | Triage | Feature |
-| [NUT-006](#nut-006) | Implement Credential Storage System | Triage | Feature |
+| [NUT-006](#nut-006) | Implement Credential Storage System | Fixed | Feature |
 | [NUT-007](#nut-007) | Implement Multi-Account Support (Backend) | Triage | Feature |
 | [NUT-008](#nut-008) | Implement CLI Frontend | Triage | Feature |
 | [NUT-009](#nut-009) | Implement CLI Output Formatting Options | Triage | Feature |
@@ -192,22 +192,22 @@ Generate direct-download URLs from share tokens.
 - NUT-004
 
 
-<a id="nut-006" class="task" data-status="triage" data-task-type="feature"></a>
+<a id="nut-006" class="task" data-status="done" data-task-type="feature"></a>
 ### Implement Credential Storage System  
 **ID:** NUT-006  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Feature  
 
 **Description:**  
 Implement secure credential storage using OS keychain when available, falling back to encrypted config files. Support Nextcloud Login Flow v2 (`/index.php/login/v2`) for browser-based interactive authentication (supporting 2FA/SSO) alongside manual app password entry.
 
 **Requirements:**  
-- [ ] Implement Nextcloud Login Flow v2 client (initiate + browser open + polling)  
-- [ ] macOS Keychain support  
-- [ ] Windows Credential Manager support  
-- [ ] Linux Secret Service support  
-- [ ] Encrypted fallback file  
-- [ ] Store server URL, username, app password  
+- [x] Implement Nextcloud Login Flow v2 client (initiate + browser open + polling)  
+- [x] macOS Keychain support  
+- [x] Windows Credential Manager support  
+- [x] Linux Secret Service support  
+- [x] Encrypted fallback file  
+- [x] Store server URL, username, app password  
 
 **Dependencies:**  
 - NUT-002
