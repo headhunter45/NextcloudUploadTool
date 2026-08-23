@@ -7,9 +7,12 @@ pub mod client;
 pub mod config;
 pub mod error;
 pub mod models;
+pub mod progress;
+pub mod webdav;
 
 // Convenient top-level re-exports
 pub use client::{NextcloudClient, ServerStatus};
 pub use config::{AccountCredentials, ClientConfig};
 pub use error::{NextcloudError, Result};
 pub use models::{UploadOptions, UploadResult};
+pub use progress::{ProgressCallback, ProgressEvent};

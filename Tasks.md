@@ -71,7 +71,7 @@ This document defines the complete project roadmap and task tracking system for 
 |---|---|---|---|
 | [NUT-001](#nut-001) | Establish Repository Structure | Fixed | Foundation |
 | [NUT-002](#nut-002) | Implement Shared Rust Backend Library | Fixed | Foundation |
-| [NUT-003](#nut-003) | Implement WebDAV Upload Logic | Triage | Feature |
+| [NUT-003](#nut-003) | Implement WebDAV Upload Logic | Fixed | Feature |
 | [NUT-004](#nut-004) | Implement OCS Share Link Generation | Triage | Feature |
 | [NUT-005](#nut-005) | Implement Direct Download URL Builder | Triage | Feature |
 | [NUT-006](#nut-006) | Implement Credential Storage System | Triage | Feature |
@@ -136,20 +136,20 @@ Implement the shared Rust library that provides all core functionality: WebDAV u
 - NUT-001
 
 
-<a id="nut-003" class="task" data-status="triage" data-task-type="feature"></a>
+<a id="nut-003" class="task" data-status="done" data-task-type="feature"></a>
 ### Implement WebDAV Upload Logic  
 **ID:** NUT-003  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Feature  
 
 **Description:**  
 Implement file upload using Nextcloud’s WebDAV API. Support streaming uploads, file size detection, and progress callbacks.
 
 **Requirements:**  
-- [ ] Implement PUT request to WebDAV endpoint  
-- [ ] Support streaming from file or stdin  
-- [ ] Provide progress callback API  
-- [ ] Handle authentication  
+- [x] Implement PUT request to WebDAV endpoint  
+- [x] Support streaming from file or stdin  
+- [x] Provide progress callback API  
+- [x] Handle authentication  
 
 **Dependencies:**  
 - NUT-002

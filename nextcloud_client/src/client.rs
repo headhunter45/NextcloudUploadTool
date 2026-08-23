@@ -24,8 +24,8 @@ pub struct ServerStatus {
 /// The core Nextcloud client instance.
 #[derive(Debug, Clone)]
 pub struct NextcloudClient {
-    config: ClientConfig,
-    http: reqwest::Client,
+    pub(crate) config: ClientConfig,
+    pub(crate) http: reqwest::Client,
 }
 
 impl NextcloudClient {
