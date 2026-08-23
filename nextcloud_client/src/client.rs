@@ -109,17 +109,6 @@ impl NextcloudClient {
             .map_err(NextcloudError::from)
     }
 
-    /// Build the public download URL from a share token.
-    ///
-    /// Format: `https://<host>/index.php/s/<token>/download`
-    pub fn direct_download_url(&self, share_token: &str) -> Result<Url> {
-        let path_segment = format!("index.php/s/{share_token}/download");
-        self.config
-            .server_url
-            .join(&path_segment)
-            .map_err(NextcloudError::from)
-    }
-
     /// Check server reachability and retrieve server version info from `/status.php`.
     ///
     /// This endpoint does not require authentication.
@@ -215,18 +204,6 @@ mod tests {
         assert_eq!(
             url.as_str(),
             "https://nextcloud.example.com/remote.php/dav/files/bob/Documents/test.pdf"
-        );
-    }
-
-    #[test]
-    fn test_direct_download_url() {
-        let config = ClientConfig::new("https://nextcloud.example.com", None).unwrap();
-        let client = NextcloudClient::new(config).unwrap();
-        let download_url = client.direct_download_url("AbCdEf12345").unwrap();
-
-        assert_eq!(
-            download_url.as_str(),
-            "https://nextcloud.example.com/index.php/s/AbCdEf12345/download"
         );
     }
 

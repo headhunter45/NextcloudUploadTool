@@ -73,7 +73,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-002](#nut-002) | Implement Shared Rust Backend Library | Fixed | Foundation |
 | [NUT-003](#nut-003) | Implement WebDAV Upload Logic | Fixed | Feature |
 | [NUT-004](#nut-004) | Implement OCS Share Link Generation | Fixed | Feature |
-| [NUT-005](#nut-005) | Implement Direct Download URL Builder | Triage | Feature |
+| [NUT-005](#nut-005) | Implement Direct Download URL Builder | Fixed | Feature |
 | [NUT-006](#nut-006) | Implement Credential Storage System | Fixed | Feature |
 | [NUT-007](#nut-007) | Implement Multi-Account Support (Backend) | Triage | Feature |
 | [NUT-008](#nut-008) | Implement CLI Frontend | Triage | Feature |
@@ -174,19 +174,19 @@ Implement creation of public share links using the OCS Sharing API.
 - NUT-002
 
 
-<a id="nut-005" class="task" data-status="triage" data-task-type="feature"></a>
+<a id="nut-005" class="task" data-status="done" data-task-type="feature"></a>
 ### Implement Direct Download URL Builder  
 **ID:** NUT-005  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Feature  
 
 **Description:**  
 Generate direct-download URLs from share tokens.
 
 **Requirements:**  
-- [ ] Build URL: `/index.php/s/<token>/download`  
-- [ ] Validate token format  
-- [ ] Provide helper API  
+- [x] Build URL: `/index.php/s/<token>/download`  
+- [x] Validate token format  
+- [x] Provide helper API  
 
 **Dependencies:**  
 - NUT-004
@@ -517,7 +517,7 @@ Tasks progress through defined statuses:
 1. `triage`: Under initial evaluation and specification. Missing requirements allowed.
 2. `pending`: Scope defined and ready for active work.
 3. `in_progress`: Active implementation in progress.
-4. `done`: Work complete, requirements checked, and verified.
+4. `done`: Fixed. Work complete, requirements checked, and verified.
 5. `blocked`: Blocked by an external obstacle or unmet dependency.
 6. `cancelled`: Deprecated or abandoned.
 
