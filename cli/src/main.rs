@@ -1,7 +1,8 @@
 use clap::{Args, Parser, Subcommand};
+use indicatif::{ProgressBar, ProgressDrawTarget, ProgressStyle};
 use serde::Serialize;
 use std::fs;
-use std::io::{self, Read};
+use std::io::{self, IsTerminal, Read};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
@@ -112,6 +113,14 @@ struct UploadArgs {
     /// Continue uploading remaining files if one fails
     #[arg(short = 'c', long)]
     continue_on_error: bool,
+
+    /// Disable terminal progress bars
+    #[arg(long)]
+    no_progress: bool,
+
+    /// Expected size in bytes when uploading via stdin (enables accurate progress)
+    #[arg(long)]
+    size: Option<u64>,
 
     /// Upload content from standard input (stdin)
     #[arg(long)]
@@ -265,6 +274,10 @@ async fn handle_upload(args: UploadArgs) -> Result<()> {
         None => CredentialStore::create_client_for_default()?,
     };
 
+    let show_progress = !args.no_progress
+        && !args.format.is_machine_readable()
+        && io::stderr().is_terminal();
+
     let mut results: Vec<UploadRecord> = Vec::new();
 
     // Stdin Upload
@@ -287,10 +300,10 @@ async fn handle_upload(args: UploadArgs) -> Result<()> {
             println!("\x1b[1;34m==>\x1b[0m Uploading {} bytes to '{}'...", len, remote_path);
         }
 
-        let progress_cb = if args.format.is_machine_readable() {
-            None
+        let progress_cb = if show_progress {
+            Some(create_indicatif_progress_callback(args.size.or(Some(len))))
         } else {
-            Some(create_progress_callback(len))
+            None
         };
 
         let cursor = io::Cursor::new(buffer);
@@ -345,7 +358,7 @@ async fn handle_upload(args: UploadArgs) -> Result<()> {
             };
 
             if !args.format.is_machine_readable() && total_files > 1 {
-                println!("\n\x1b[1;35m[{}/{}]\x1b[0m Processing '{}'", i + 1, total_files, local_path.display());
+                println!("\n\x1b[1;35m[{}/{}]\x1b[0m '{}'", i + 1, total_files, local_path.display());
             }
 
             match upload_single_file(
@@ -355,6 +368,7 @@ async fn handle_upload(args: UploadArgs) -> Result<()> {
                 args.share,
                 args.password.as_deref(),
                 &args.format,
+                show_progress,
             )
             .await
             {
@@ -460,6 +474,7 @@ async fn upload_single_file(
     create_share: bool,
     password: Option<&str>,
     format: &OutputFormatArgs,
+    show_progress: bool,
 ) -> Result<UploadRecord> {
     let metadata = tokio::fs::metadata(local_path).await?;
     let file_size = metadata.len();
@@ -468,10 +483,10 @@ async fn upload_single_file(
         println!("\x1b[1;34m==>\x1b[0m Uploading '{}' ({} bytes) -> '{}'...", local_path.display(), file_size, remote_path);
     }
 
-    let progress_cb = if format.is_machine_readable() {
-        None
+    let progress_cb = if show_progress {
+        Some(create_indicatif_progress_callback(Some(file_size)))
     } else {
-        Some(create_progress_callback(file_size))
+        None
     };
 
     let options = UploadOptions {
@@ -581,21 +596,38 @@ fn render_upload_results(results: &[UploadRecord], format: &OutputFormatArgs) {
     }
 }
 
-fn create_progress_callback(total_bytes: u64) -> ProgressCallback {
+fn create_indicatif_progress_callback(total_bytes: Option<u64>) -> ProgressCallback {
+    let pb = match total_bytes {
+        Some(total) if total > 0 => {
+            let pb = ProgressBar::new(total);
+            pb.set_draw_target(ProgressDrawTarget::stderr());
+            pb.set_style(
+                ProgressStyle::default_bar()
+                    .template("    [{elapsed_precise}] [{bar:35.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, ETA {eta})")
+                    .unwrap()
+                    .progress_chars("#>-"),
+            );
+            pb
+        }
+        _ => {
+            let pb = ProgressBar::new_spinner();
+            pb.set_draw_target(ProgressDrawTarget::stderr());
+            pb.set_style(
+                ProgressStyle::default_spinner()
+                    .template("    [{elapsed_precise}] Uploaded {bytes} ({bytes_per_sec})")
+                    .unwrap(),
+            );
+            pb
+        }
+    };
+
     Arc::new(move |event| match event {
-        ProgressEvent::Progress { bytes_transferred, total_bytes: total } => {
-            let tot = total.unwrap_or(total_bytes);
-            if tot > 0 {
-                let percent = (bytes_transferred as f64 / tot as f64) * 100.0;
-                print!("\r    \x1b[1;33mProgress:\x1b[0m {:>3.0}% ({}/{} bytes)", percent, bytes_transferred, tot);
-            } else {
-                print!("\r    \x1b[1;33mProgress:\x1b[0m {} bytes transferred", bytes_transferred);
-            }
-            let _ = io::Write::flush(&mut io::stdout());
+        ProgressEvent::Progress { bytes_transferred, .. } => {
+            pb.set_position(bytes_transferred);
         }
         ProgressEvent::Completed { total_bytes } => {
-            print!("\r    \x1b[1;33mProgress:\x1b[0m 100% ({} bytes)    ", total_bytes);
-            let _ = io::Write::flush(&mut io::stdout());
+            pb.set_position(total_bytes);
+            pb.finish_and_clear();
         }
         _ => {}
     })

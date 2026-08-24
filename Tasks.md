@@ -69,7 +69,6 @@ This document defines the complete project roadmap and task tracking system for 
 
 | ID | Title | Status | Type |
 |---|---|---|---|
-| [NUT-011](#nut-011) | Implement CLI Progress Reporting + pv Support | Triage | Feature |
 | [NUT-012](#nut-012) | Implement GUI (Tauri) Frontend | Triage | Feature |
 | [NUT-013](#nut-013) | Implement GUI File Queue + Drag-and-Drop | Triage | Feature |
 | [NUT-014](#nut-014) | Implement GUI Credential Management UI | Triage | Feature |
@@ -90,6 +89,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-008](#nut-008) | Implement CLI Frontend | Fixed | Feature |
 | [NUT-009](#nut-009) | Implement CLI Output Formatting Options | Fixed | Feature |
 | [NUT-010](#nut-010) | Implement CLI Multi-file Upload Support | Fixed | Feature |
+| [NUT-011](#nut-011) | Implement CLI Progress Reporting + pv Support | Fixed | Feature |
 
 ---
 
@@ -295,19 +295,21 @@ Support uploading multiple files in a single CLI invocation, including recursive
 - NUT-009
 
 
-<a id="nut-011" class="task" data-status="triage" data-task-type="feature"></a>
+<a id="nut-011" class="task" data-status="done" data-task-type="feature"></a>
 ### Implement CLI Progress Reporting + pv Support  
 **ID:** NUT-011  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Feature  
 
 **Description:**  
-Integrate with `pv` for progress reporting and support streaming uploads.
+Integrate rich progress reporting with `indicatif` (speed, ETA, byte counters), pipe-friendly detection (e.g. `pv` and headless/script pipes), and manual size hints for stdin streams.
 
 **Requirements:**  
-- [ ] Detect file size  
-- [ ] Report progress to stdout  
-- [ ] Support piping from `pv`  
+- [x] Detect file size & support `--size` hint for stdin streams  
+- [x] Rich terminal progress bar with speed (MB/s), ETA, bytes transferred, and percentage  
+- [x] Auto-detect TTY: silence progress bars when piped to downstream tools or files  
+- [x] Support explicit `--no-progress` flag  
+- [x] Support piping directly from `pv` or Unix pipelines without display conflicts  
 
 **Dependencies:**  
 - NUT-003  
