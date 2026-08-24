@@ -1,5 +1,6 @@
 use clap::{Args, Parser, Subcommand};
 use serde::Serialize;
+use std::fs;
 use std::io::{self, Read};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -84,7 +85,7 @@ impl OutputFormatArgs {
 
 #[derive(Args, Debug)]
 struct UploadArgs {
-    /// Path to local file(s) to upload
+    /// Path to local file(s) or directories to upload
     #[arg(value_name = "FILE")]
     files: Vec<PathBuf>,
 
@@ -103,6 +104,14 @@ struct UploadArgs {
     /// Optional password to protect the public share link
     #[arg(short, long)]
     password: Option<String>,
+
+    /// Recursively upload directories
+    #[arg(short, long)]
+    recursive: bool,
+
+    /// Continue uploading remaining files if one fails
+    #[arg(short = 'c', long)]
+    continue_on_error: bool,
 
     /// Upload content from standard input (stdin)
     #[arg(long)]
@@ -150,6 +159,9 @@ struct UploadRecord {
     file: String,
     remote_path: String,
     bytes: u64,
+    success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    error: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     share_url: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -303,6 +315,8 @@ async fn handle_upload(args: UploadArgs) -> Result<()> {
             file: "stdin".to_string(),
             remote_path,
             bytes,
+            success: true,
+            error: None,
             share_url,
             direct_download_url,
         });
@@ -313,17 +327,62 @@ async fn handle_upload(args: UploadArgs) -> Result<()> {
             ));
         }
 
-        for file_path in &args.files {
-            let record = upload_single_file(
+        // Collect all target files (expanding directories if recursive)
+        let file_targets = collect_file_targets(&args.files, args.recursive)?;
+
+        let total_files = file_targets.len();
+        if !args.format.is_machine_readable() && total_files > 1 {
+            println!("\x1b[1;34m==>\x1b[0m Preparing to upload {} files...", total_files);
+        }
+
+        let mut has_failure = false;
+        for (i, (local_path, rel_path)) in file_targets.iter().enumerate() {
+            let clean_dir = args.remote_dir.trim_matches('/');
+            let remote_path = if clean_dir.is_empty() {
+                rel_path.clone()
+            } else {
+                format!("{clean_dir}/{rel_path}")
+            };
+
+            if !args.format.is_machine_readable() && total_files > 1 {
+                println!("\n\x1b[1;35m[{}/{}]\x1b[0m Processing '{}'", i + 1, total_files, local_path.display());
+            }
+
+            match upload_single_file(
                 &client,
-                file_path,
-                &args.remote_dir,
+                local_path,
+                &remote_path,
                 args.share,
                 args.password.as_deref(),
                 &args.format,
             )
-            .await?;
-            results.push(record);
+            .await
+            {
+                Ok(record) => results.push(record),
+                Err(e) => {
+                    has_failure = true;
+                    if args.continue_on_error {
+                        eprintln!("\x1b[1;31mError uploading '{}':\x1b[0m {e}", local_path.display());
+                        results.push(UploadRecord {
+                            file: local_path.display().to_string(),
+                            remote_path,
+                            bytes: 0,
+                            success: false,
+                            error: Some(e.to_string()),
+                            share_url: None,
+                            direct_download_url: None,
+                        });
+                    } else {
+                        return Err(e);
+                    }
+                }
+            }
+        }
+
+        if has_failure && !args.continue_on_error {
+            return Err(nextcloud_client::NextcloudError::Other(
+                "Upload batch encountered errors.".into(),
+            ));
         }
     }
 
@@ -331,32 +390,77 @@ async fn handle_upload(args: UploadArgs) -> Result<()> {
     Ok(())
 }
 
+fn collect_file_targets(
+    paths: &[PathBuf],
+    recursive: bool,
+) -> Result<Vec<(PathBuf, String)>> {
+    let mut targets = Vec::new();
+
+    for path in paths {
+        if !path.exists() {
+            return Err(nextcloud_client::NextcloudError::NotFound {
+                path: path.display().to_string(),
+            });
+        }
+
+        if path.is_file() {
+            let filename = path
+                .file_name()
+                .and_then(|n| n.to_str())
+                .unwrap_or("file")
+                .to_string();
+            targets.push((path.clone(), filename));
+        } else if path.is_dir() {
+            if !recursive {
+                return Err(nextcloud_client::NextcloudError::InvalidPath {
+                    path: path.display().to_string(),
+                    reason: "Path is a directory. Use -r / --recursive to upload directories.".into(),
+                });
+            }
+
+            let base_parent = path.parent().unwrap_or(path);
+            collect_dir_recursive(path, base_parent, &mut targets)?;
+        }
+    }
+
+    Ok(targets)
+}
+
+fn collect_dir_recursive(
+    dir: &Path,
+    base_dir: &Path,
+    targets: &mut Vec<(PathBuf, String)>,
+) -> Result<()> {
+    let entries = fs::read_dir(dir).map_err(|e| nextcloud_client::NextcloudError::Other(e.to_string()))?;
+
+    for entry in entries {
+        let entry = entry.map_err(|e| nextcloud_client::NextcloudError::Other(e.to_string()))?;
+        let entry_path = entry.path();
+
+        if entry_path.is_file() {
+            let rel_path = entry_path
+                .strip_prefix(base_dir)
+                .map_err(|e| nextcloud_client::NextcloudError::Other(e.to_string()))?
+                .to_string_lossy()
+                .replace('\\', "/");
+
+            targets.push((entry_path, rel_path));
+        } else if entry_path.is_dir() {
+            collect_dir_recursive(&entry_path, base_dir, targets)?;
+        }
+    }
+
+    Ok(())
+}
+
 async fn upload_single_file(
     client: &NextcloudClient,
     local_path: &Path,
-    remote_dir: &str,
+    remote_path: &str,
     create_share: bool,
     password: Option<&str>,
     format: &OutputFormatArgs,
 ) -> Result<UploadRecord> {
-    if !local_path.exists() {
-        return Err(nextcloud_client::NextcloudError::NotFound {
-            path: local_path.display().to_string(),
-        });
-    }
-
-    let file_name = local_path
-        .file_name()
-        .and_then(|n| n.to_str())
-        .unwrap_or("file");
-
-    let clean_dir = remote_dir.trim_matches('/');
-    let remote_path = if clean_dir.is_empty() {
-        file_name.to_string()
-    } else {
-        format!("{clean_dir}/{file_name}")
-    };
-
     let metadata = tokio::fs::metadata(local_path).await?;
     let file_size = metadata.len();
 
@@ -371,7 +475,7 @@ async fn upload_single_file(
     };
 
     let options = UploadOptions {
-        remote_path: remote_path.clone(),
+        remote_path: remote_path.to_string(),
         create_share,
         share_password: password.map(|s| s.to_string()),
         overwrite: true,
@@ -383,8 +487,10 @@ async fn upload_single_file(
 
     Ok(UploadRecord {
         file: local_path.display().to_string(),
-        remote_path,
+        remote_path: remote_path.to_string(),
         bytes: result.bytes_uploaded,
+        success: true,
+        error: None,
         share_url: result.share_url,
         direct_download_url: result.direct_download_url,
     })
@@ -403,10 +509,11 @@ fn render_upload_results(results: &[UploadRecord], format: &OutputFormatArgs) {
     if format.tsv {
         for r in results {
             println!(
-                "{}\t{}\t{}\t{}\t{}",
+                "{}\t{}\t{}\t{}\t{}\t{}",
                 r.file,
                 r.remote_path,
                 r.bytes,
+                r.success,
                 r.share_url.as_deref().unwrap_or(""),
                 r.direct_download_url.as_deref().unwrap_or("")
             );
@@ -445,14 +552,32 @@ fn render_upload_results(results: &[UploadRecord], format: &OutputFormatArgs) {
     }
 
     // Default human-readable terminal output
+    let mut total_bytes = 0u64;
+    let mut success_count = 0;
+    let total_count = results.len();
+
     for r in results {
-        println!("\n\x1b[1;32m✓\x1b[0m Uploaded '{}' ({} bytes)", r.file, r.bytes);
-        if let Some(ref share_url) = r.share_url {
-            println!("  \x1b[1;32mShare Link:\x1b[0m       {}", share_url);
+        if r.success {
+            success_count += 1;
+            total_bytes += r.bytes;
+            println!("\n\x1b[1;32m✓\x1b[0m Uploaded '{}' ({} bytes)", r.file, r.bytes);
+            if let Some(ref share_url) = r.share_url {
+                println!("  \x1b[1;32mShare Link:\x1b[0m       {}", share_url);
+            }
+            if let Some(ref direct_url) = r.direct_download_url {
+                println!("  \x1b[1;32mDirect Download:\x1b[0m  {}", direct_url);
+            }
+        } else {
+            println!("\n\x1b[1;31m✗\x1b[0m Failed to upload '{}'", r.file);
+            if let Some(ref err) = r.error {
+                println!("  \x1b[1;31mError:\x1b[0m {}", err);
+            }
         }
-        if let Some(ref direct_url) = r.direct_download_url {
-            println!("  \x1b[1;32mDirect Download:\x1b[0m  {}", direct_url);
-        }
+    }
+
+    if total_count > 1 {
+        println!("\n\x1b[1;34m==> Summary:\x1b[0m {}/{} files uploaded successfully ({} total bytes)",
+            success_count, total_count, total_bytes);
     }
 }
 

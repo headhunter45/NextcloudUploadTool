@@ -69,7 +69,6 @@ This document defines the complete project roadmap and task tracking system for 
 
 | ID | Title | Status | Type |
 |---|---|---|---|
-| [NUT-010](#nut-010) | Implement CLI Multi-file Upload Support | Triage | Feature |
 | [NUT-011](#nut-011) | Implement CLI Progress Reporting + pv Support | Triage | Feature |
 | [NUT-012](#nut-012) | Implement GUI (Tauri) Frontend | Triage | Feature |
 | [NUT-013](#nut-013) | Implement GUI File Queue + Drag-and-Drop | Triage | Feature |
@@ -90,6 +89,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-007](#nut-007) | Implement Multi-Account Support (Backend) | Fixed | Feature |
 | [NUT-008](#nut-008) | Implement CLI Frontend | Fixed | Feature |
 | [NUT-009](#nut-009) | Implement CLI Output Formatting Options | Fixed | Feature |
+| [NUT-010](#nut-010) | Implement CLI Multi-file Upload Support | Fixed | Feature |
 
 ---
 
@@ -274,22 +274,25 @@ Add output formatting options for scripting and automation.
 - NUT-008
 
 
-<a id="nut-010" class="task" data-status="triage" data-task-type="feature"></a>
+<a id="nut-010" class="task" data-status="done" data-task-type="feature"></a>
 ### Implement CLI Multi-file Upload Support  
 **ID:** NUT-010  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Feature  
 
 **Description:**  
-Support uploading multiple files in a single CLI invocation.
+Support uploading multiple files in a single CLI invocation, including recursive directory uploading, glob expansions, batch progress summaries, and `--continue-on-error`.
 
 **Requirements:**  
-- [ ] Accept multiple file paths  
-- [ ] Loop over uploads  
-- [ ] Return list of results  
+- [x] Accept multiple file paths and globs  
+- [x] Recursive directory upload support (`--recursive` / `-r`)  
+- [x] Continue on error option (`--continue-on-error` / `-c`)  
+- [x] Aggregate upload summary (count, total bytes, share links)  
+- [x] JSON array and multi-row TSV output formatting for multi-file batches  
 
 **Dependencies:**  
-- NUT-008
+- NUT-008  
+- NUT-009
 
 
 <a id="nut-011" class="task" data-status="triage" data-task-type="feature"></a>
