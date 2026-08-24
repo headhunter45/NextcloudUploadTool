@@ -12,7 +12,7 @@ use nextcloud_client::{
     ProgressCallback, ProgressEvent, Result, UploadOptions,
 };
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, PartialEq)]
 #[command(
     name = "nut",
     author = "Tom Hicks <headhunter3@gmail.com>",
@@ -25,7 +25,7 @@ struct Cli {
     command: Commands,
 }
 
-#[derive(Subcommand, Debug)]
+#[derive(Subcommand, Debug, PartialEq)]
 enum Commands {
     /// Log in to a Nextcloud server using browser authorization (Login Flow v2) or credentials
     Login(LoginArgs),
@@ -41,7 +41,7 @@ enum Commands {
     Accounts(AccountListArgs),
 }
 
-#[derive(Args, Debug)]
+#[derive(Args, Debug, PartialEq)]
 struct LoginArgs {
     /// Base URL of the Nextcloud instance (e.g. https://cloud.example.com)
     server_url: String,
@@ -71,7 +71,7 @@ struct LoginArgs {
     app_password: Option<String>,
 }
 
-#[derive(Args, Debug, Clone, Default)]
+#[derive(Args, Debug, Clone, Default, PartialEq)]
 struct OutputFormatArgs {
     /// Format output as JSON
     #[arg(long, conflicts_with_all = ["tsv", "url_only", "direct_url_only"])]
@@ -100,7 +100,7 @@ impl OutputFormatArgs {
     }
 }
 
-#[derive(Args, Debug)]
+#[derive(Args, Debug, PartialEq)]
 struct UploadArgs {
     /// Path to local file(s) or directories to upload
     #[arg(value_name = "FILE")]
@@ -150,7 +150,7 @@ struct UploadArgs {
     format: OutputFormatArgs,
 }
 
-#[derive(Subcommand, Debug)]
+#[derive(Subcommand, Debug, PartialEq)]
 enum AccountCommands {
     /// List all configured Nextcloud accounts
     List(AccountListArgs),
@@ -168,7 +168,7 @@ enum AccountCommands {
     },
 }
 
-#[derive(Args, Debug, Clone, Default)]
+#[derive(Args, Debug, Clone, Default, PartialEq)]
 struct AccountListArgs {
     /// Format output as JSON
     #[arg(long, conflicts_with = "tsv")]
@@ -770,4 +770,56 @@ fn handle_account_delete(account: &str) -> Result<()> {
     CredentialStore::delete_account(account)?;
     println!("\x1b[1;32m✓\x1b[0m Account '\x1b[1m{}\x1b[0m' deleted.", account);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_cli_account_flag_parsing() {
+        let parsed = Cli::try_parse_from(&[
+            "nut",
+            "upload",
+            "--account",
+            "alice@cloud.example.com",
+            "document.pdf",
+        ])
+        .unwrap();
+
+        match parsed.command {
+            Commands::Upload(args) => {
+                assert_eq!(args.account.as_deref(), Some("alice@cloud.example.com"));
+                assert_eq!(args.files, vec![PathBuf::from("document.pdf")]);
+            }
+            _ => panic!("Expected Upload command"),
+        }
+    }
+
+    #[test]
+    fn test_cli_account_subcommands_parsing() {
+        let parsed = Cli::try_parse_from(&["nut", "account", "default", "Work"]).unwrap();
+        match parsed.command {
+            Commands::Account(AccountCommands::Default { account }) => {
+                assert_eq!(account, "Work");
+            }
+            _ => panic!("Expected Account Default command"),
+        }
+
+        let parsed_del = Cli::try_parse_from(&["nut", "account", "delete", "bob@cloud.com"]).unwrap();
+        match parsed_del.command {
+            Commands::Account(AccountCommands::Delete { account }) => {
+                assert_eq!(account, "bob@cloud.com");
+            }
+            _ => panic!("Expected Account Delete command"),
+        }
+
+        let parsed_list = Cli::try_parse_from(&["nut", "accounts", "--json"]).unwrap();
+        match parsed_list.command {
+            Commands::Accounts(args) => {
+                assert!(args.json);
+            }
+            _ => panic!("Expected Accounts list command"),
+        }
+    }
 }

@@ -70,7 +70,6 @@ This document defines the complete project roadmap and task tracking system for 
 
 | ID | Title | Status | Type |
 |---|---|---|---|
-| [NUT-017](#nut-017) | Implement Multi-Account Switching (GUI + CLI) | Triage | Integration |
 | [NUT-018](#nut-018) | Implement Packaging for macOS, Windows, Linux | Triage | Chore |
 | [NUT-019](#nut-019) | Implement Homebrew/Winget/Chocolatey Manifests | Triage | Chore |
 | [NUT-020](#nut-020) | Write Documentation + Examples | Triage | Chore |
@@ -93,6 +92,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-014](#nut-014) | Implement GUI Credential Management UI | Fixed | Feature |
 | [NUT-015](#nut-015) | Implement GUI Upload Progress Bars | Fixed | Feature |
 | [NUT-016](#nut-016) | Implement Shared Auth Token Reuse | Fixed | Integration |
+| [NUT-017](#nut-017) | Implement Multi-Account Switching (GUI + CLI) | Fixed | Integration |
 | [NUT-021](#nut-021) | Support Headless & SSH Remote Authentication Modes | Fixed | Feature |
 
 ---
@@ -422,19 +422,19 @@ Ensure both CLI and GUI reuse the same credential store and cached tokens.
 - NUT-012
 
 
-<a id="nut-017" class="task" data-status="triage" data-task-type="integration"></a>
+<a id="nut-017" class="task" data-status="done" data-task-type="integration"></a>
 ### Implement Multi-Account Switching (GUI + CLI)  
 **ID:** NUT-017  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Integration  
 
 **Description:**  
 Add multi-account switching to both CLI and GUI.
 
 **Requirements:**  
-- [ ] CLI `--account` flag  
-- [ ] GUI dropdown  
-- [ ] Shared backend logic  
+- [x] CLI `--account` flag  
+- [x] GUI dropdown  
+- [x] Shared backend logic  
 
 **Dependencies:**  
 - NUT-007  
