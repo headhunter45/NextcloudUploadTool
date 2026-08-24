@@ -71,7 +71,6 @@ This document defines the complete project roadmap and task tracking system for 
 | ID | Title | Status | Type |
 |---|---|---|---|
 | [NUT-019](#nut-019) | Implement Homebrew/Winget/Chocolatey Manifests | Triage | Chore |
-| [NUT-022](#nut-022) | Implement CLI Shell Completions Generation | Triage | Feature |
 | [NUT-023](#nut-023) | Write Comprehensive CLI Documentation and Automation Guides | Triage | Chore |
 | [NUT-024](#nut-024) | Create Docker/Podman Nextcloud Integration Test Harness | Triage | Foundation |
 | [NUT-001](#nut-001) | Establish Repository Structure | Fixed | Foundation |
@@ -94,6 +93,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-018](#nut-018) | Implement Packaging for macOS, Windows, Linux | Fixed | Chore |
 | [NUT-020](#nut-020) | Write Documentation + Examples | Fixed | Chore |
 | [NUT-021](#nut-021) | Support Headless & SSH Remote Authentication Modes | Fixed | Feature |
+| [NUT-022](#nut-022) | Implement CLI Shell Completions Generation | Fixed | Feature |
 
 ---
 
@@ -522,20 +522,20 @@ Ensure smooth authentication experiences when running the CLI over SSH or in hea
 - NUT-008
 
 
-<a id="nut-022" class="task" data-status="triage" data-task-type="feature"></a>
+<a id="nut-022" class="task" data-status="done" data-task-type="feature"></a>
 ### Implement CLI Shell Completions Generation  
 **ID:** NUT-022  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Feature  
 
 **Description:**  
 Add automated shell completion script generation using `clap_complete` for major shells (`bash`, `zsh`, `fish`, `powershell`, `elvish`).
 
 **Requirements:**  
-- [ ] Add `clap_complete` crate dependency  
-- [ ] Implement `nut completions <SHELL>` subcommand  
-- [ ] Support `bash`, `zsh`, `fish`, `powershell`, and `elvish` output to stdout  
-- [ ] Include quick installation instructions in command help  
+- [x] Add `clap_complete` crate dependency  
+- [x] Implement `nut completions <SHELL>` subcommand  
+- [x] Support `bash`, `zsh`, `fish`, `powershell`, and `elvish` output to stdout  
+- [x] Include quick installation instructions in command help  
 
 **Dependencies:**  
 - NUT-008

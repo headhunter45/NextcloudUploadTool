@@ -1,4 +1,5 @@
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, CommandFactory, Parser, Subcommand};
+use clap_complete::{generate, Shell};
 use indicatif::{ProgressBar, ProgressDrawTarget, ProgressStyle};
 use serde::Serialize;
 use std::fs;
@@ -39,6 +40,13 @@ enum Commands {
 
     /// Quick alias to list all configured accounts
     Accounts(AccountListArgs),
+
+    /// Generate shell completion scripts for bash, zsh, fish, powershell, or elvish
+    Completions {
+        /// Target shell to generate completions for
+        #[arg(value_enum)]
+        shell: Shell,
+    },
 }
 
 #[derive(Args, Debug, PartialEq)]
@@ -207,12 +215,22 @@ async fn main() {
             handle_account_set_default(&account)
         }
         Commands::Account(AccountCommands::Delete { account }) => handle_account_delete(&account),
+        Commands::Completions { shell } => {
+            handle_completions(shell);
+            Ok(())
+        }
     };
 
     if let Err(err) = result {
         eprintln!("\x1b[1;31mError:\x1b[0m {err}");
         std::process::exit(1);
     }
+}
+
+/// Generate shell completion scripts for supported shells.
+fn handle_completions(shell: Shell) {
+    let mut cmd = Cli::command();
+    generate(shell, &mut cmd, "nut", &mut io::stdout());
 }
 
 /// Handle interactive or non-interactive login flows.
@@ -820,6 +838,37 @@ mod tests {
                 assert!(args.json);
             }
             _ => panic!("Expected Accounts list command"),
+        }
+    }
+
+    #[test]
+    fn test_cli_completions_parsing() {
+        let shells = [
+            ("bash", Shell::Bash),
+            ("zsh", Shell::Zsh),
+            ("fish", Shell::Fish),
+            ("powershell", Shell::PowerShell),
+            ("elvish", Shell::Elvish),
+        ];
+
+        for (name, expected_shell) in shells {
+            let parsed = Cli::try_parse_from(&["nut", "completions", name]).unwrap();
+            match parsed.command {
+                Commands::Completions { shell } => {
+                    assert_eq!(shell, expected_shell);
+                }
+                _ => panic!("Expected Completions command for shell {name}"),
+            }
+
+            let mut buf = Vec::new();
+            let mut cmd = Cli::command();
+            generate(expected_shell, &mut cmd, "nut", &mut buf);
+            assert!(!buf.is_empty(), "Generated completion for {name} should not be empty");
+            let output_str = String::from_utf8(buf).expect("Completions should be valid UTF-8");
+            assert!(
+                output_str.contains("nut"),
+                "Completion output should contain 'nut'"
+            );
         }
     }
 }
