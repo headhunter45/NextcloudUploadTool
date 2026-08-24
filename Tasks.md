@@ -78,6 +78,9 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-018](#nut-018) | Implement Packaging for macOS, Windows, Linux | Triage | Chore |
 | [NUT-019](#nut-019) | Implement Homebrew/Winget/Chocolatey Manifests | Triage | Chore |
 | [NUT-020](#nut-020) | Write Documentation + Examples | Triage | Chore |
+| [NUT-022](#nut-022) | Implement CLI Shell Completions Generation | Triage | Feature |
+| [NUT-023](#nut-023) | Write Comprehensive CLI Documentation and Automation Guides | Triage | Chore |
+| [NUT-024](#nut-024) | Create Docker/Podman Nextcloud Integration Test Harness | Triage | Foundation |
 | [NUT-001](#nut-001) | Establish Repository Structure | Fixed | Foundation |
 | [NUT-002](#nut-002) | Implement Shared Rust Backend Library | Fixed | Foundation |
 | [NUT-003](#nut-003) | Implement WebDAV Upload Logic | Fixed | Feature |
@@ -483,16 +486,16 @@ Add package manager manifests for easy installation.
 **Type:** Chore  
 
 **Description:**  
-Write documentation for installation, usage, examples, and API reference.
+Write comprehensive project documentation covering installation, GUI usage, multi-account setup, and overall project architecture.
 
 **Requirements:**  
-- [ ] CLI usage docs  
-- [ ] GUI usage docs  
-- [ ] Multi-account docs  
-- [ ] Examples for scripting  
+- [ ] GUI overview and visual walkthrough  
+- [ ] Cross-platform installation instructions  
+- [ ] Multi-account management guide  
+- [ ] Architecture and developer setup documentation  
 
 **Dependencies:**  
-- NUT-009  
+- NUT-012  
 - NUT-017  
 - NUT-018
 
@@ -515,6 +518,72 @@ Ensure smooth authentication experiences when running the CLI over SSH or in hea
 **Dependencies:**  
 - NUT-006  
 - NUT-008
+
+
+<a id="nut-022" class="task" data-status="triage" data-task-type="feature"></a>
+### Implement CLI Shell Completions Generation  
+**ID:** NUT-022  
+**Status:** Triage  
+**Type:** Feature  
+
+**Description:**  
+Add automated shell completion script generation using `clap_complete` for major shells (`bash`, `zsh`, `fish`, `powershell`, `elvish`).
+
+**Requirements:**  
+- [ ] Add `clap_complete` crate dependency  
+- [ ] Implement `nut completions <SHELL>` subcommand  
+- [ ] Support `bash`, `zsh`, `fish`, `powershell`, and `elvish` output to stdout  
+- [ ] Include quick installation instructions in command help  
+
+**Dependencies:**  
+- NUT-008
+
+
+<a id="nut-023" class="task" data-status="triage" data-task-type="chore"></a>
+### Write Comprehensive CLI Documentation and Automation Guides  
+**ID:** NUT-023  
+**Status:** Triage  
+**Type:** Chore  
+
+**Description:**  
+Write dedicated CLI reference documentation and practical automation guides for scripting, CI/CD, and Unix pipeline workflows.
+
+**Requirements:**  
+- [ ] Document all CLI subcommands (`login`, `upload`, `accounts`, `completions`) and flags in `README.md`  
+- [ ] Provide practical recipes for piping data (`stdin`, `pv`, `curl`, `mysqldump`)  
+- [ ] Provide scripting examples parsing `--json`, `--tsv`, `--url-only`, and `--direct-url-only` with `jq` and `xargs`  
+- [ ] Document headless SSH and CI/CD automated provisioning with `--username` and `--app-password`  
+
+**Dependencies:**  
+- NUT-008  
+- NUT-009  
+- NUT-010  
+- NUT-011  
+- NUT-021
+
+
+<a id="nut-024" class="task" data-status="triage" data-task-type="foundation"></a>
+### Create Docker/Podman Nextcloud Integration Test Harness  
+**ID:** NUT-024  
+**Status:** Triage  
+**Type:** Foundation  
+
+**Description:**  
+Create a containerized integration test harness using Docker or Podman to spin up an ephemeral, fresh Nextcloud instance, seed an admin test account and credentials, and execute end-to-end integration tests for the CLI against real WebDAV and OCS sharing endpoints.
+
+**Requirements:**  
+- [ ] Provide setup script (`scripts/test-server-up.sh`) using Docker/Podman compose to launch and initialize a fresh Nextcloud container  
+- [ ] Automatically configure admin user credentials, disable password expiration, and establish app password / token  
+- [ ] Provide teardown script (`scripts/test-server-down.sh`) for clean container and volume disposal  
+- [ ] Implement Rust integration test suite (`tests/cli_integration.rs` or `cli/tests/`) running real CLI uploads, folder creations, stdin streams, and public share link verifications  
+- [ ] Support automated CI/CD execution of the integration harness  
+
+**Dependencies:**  
+- NUT-008  
+- NUT-009  
+- NUT-010  
+- NUT-011  
+- NUT-021
 
 ---
 
