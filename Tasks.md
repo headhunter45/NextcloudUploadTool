@@ -69,7 +69,6 @@ This document defines the complete project roadmap and task tracking system for 
 
 | ID | Title | Status | Type |
 |---|---|---|---|
-| [NUT-008](#nut-008) | Implement CLI Frontend | Triage | Feature |
 | [NUT-009](#nut-009) | Implement CLI Output Formatting Options | Triage | Feature |
 | [NUT-010](#nut-010) | Implement CLI Multi-file Upload Support | Triage | Feature |
 | [NUT-011](#nut-011) | Implement CLI Progress Reporting + pv Support | Triage | Feature |
@@ -90,6 +89,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-005](#nut-005) | Implement Direct Download URL Builder | Fixed | Feature |
 | [NUT-006](#nut-006) | Implement Credential Storage System | Fixed | Feature |
 | [NUT-007](#nut-007) | Implement Multi-Account Support (Backend) | Fixed | Feature |
+| [NUT-008](#nut-008) | Implement CLI Frontend | Fixed | Feature |
 
 ---
 
@@ -232,21 +232,21 @@ Support multiple Nextcloud accounts in the backend credential system.
 - NUT-006
 
 
-<a id="nut-008" class="task" data-status="triage" data-task-type="feature"></a>
+<a id="nut-008" class="task" data-status="done" data-task-type="feature"></a>
 ### Implement CLI Frontend  
 **ID:** NUT-008  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Feature  
 
 **Description:**  
 Implement the CLI tool using the shared backend library, including interactive browser login via Login Flow v2 and file upload commands.
 
 **Requirements:**  
-- [ ] Add `login` command (browser-based Login Flow v2)  
-- [ ] Add `upload` command  
-- [ ] Add `--account` flag  
-- [ ] Add `--stdin` support  
-- [ ] Add error reporting  
+- [x] Add `login` command (browser-based Login Flow v2)  
+- [x] Add `upload` command  
+- [x] Add `--account` flag  
+- [x] Add `--stdin` support  
+- [x] Add error reporting  
 
 **Dependencies:**  
 - NUT-003  

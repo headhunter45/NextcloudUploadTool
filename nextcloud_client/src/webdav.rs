@@ -15,6 +15,7 @@ pub const DEFAULT_CHUNK_SIZE: usize = 64 * 1024;
 
 impl NextcloudClient {
     /// Upload a stream of bytes to a Nextcloud WebDAV destination with optional progress reporting.
+    /// Automatically ensures any parent directories exist before uploading.
     ///
     /// # Arguments
     /// * `remote_path` - The destination path on Nextcloud (e.g. `"Uploads/photo.jpg"`).
@@ -32,6 +33,14 @@ impl NextcloudClient {
         S: Stream<Item = std::result::Result<Bytes, E>> + Send + Sync + 'static,
         E: Into<Box<dyn std::error::Error + Send + Sync>> + 'static,
     {
+        // Ensure parent directories exist
+        let clean_path = remote_path.trim_start_matches('/');
+        if let Some((parent_dir, _)) = clean_path.rsplit_once('/') {
+            if !parent_dir.is_empty() {
+                self.create_folder_all(parent_dir).await?;
+            }
+        }
+
         let url = self.webdav_url(remote_path)?;
         let progress_stream = ProgressStream::new(stream, content_length, callback);
         let body = reqwest::Body::wrap_stream(progress_stream);
@@ -58,7 +67,7 @@ impl NextcloudClient {
             })
         } else if status == reqwest::StatusCode::CONFLICT {
             Err(NextcloudError::Other(format!(
-                "WebDAV Conflict (409) at '{remote_path}'. Ensure the parent directory exists on Nextcloud."
+                "WebDAV Conflict (409) at '{remote_path}'. Ensure the destination directory exists."
             )))
         } else {
             let error_text = response.text().await.unwrap_or_default();
@@ -148,5 +157,26 @@ impl NextcloudClient {
                 message: error_text,
             })
         }
+    }
+
+    /// Recursively ensure all parent and subdirectories exist using WebDAV `MKCOL`.
+    pub async fn create_folder_all(&self, remote_dir: &str) -> Result<()> {
+        let clean = remote_dir.trim_matches('/');
+        if clean.is_empty() {
+            return Ok(());
+        }
+
+        let mut current_path = String::new();
+        for segment in clean.split('/') {
+            if segment.is_empty() {
+                continue;
+            }
+            if !current_path.is_empty() {
+                current_path.push('/');
+            }
+            current_path.push_str(segment);
+            self.create_folder(&current_path).await?;
+        }
+        Ok(())
     }
 }

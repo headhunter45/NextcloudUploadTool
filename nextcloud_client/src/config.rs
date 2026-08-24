@@ -69,11 +69,8 @@ mod humantime_serde {
 }
 
 impl ClientConfig {
-    /// Create a new `ClientConfig` by parsing a URL string and optional credentials.
-    pub fn new(
-        server_url_str: &str,
-        credentials: Option<AccountCredentials>,
-    ) -> Result<Self> {
+    /// Normalize a server URL string: validates http/https scheme and ensures a trailing slash.
+    pub fn normalize_url(server_url_str: &str) -> Result<Url> {
         let mut server_url = Url::parse(server_url_str)?;
 
         // Ensure scheme is http or https
@@ -89,6 +86,16 @@ impl ClientConfig {
             let new_path = format!("{}/", server_url.path());
             server_url.set_path(&new_path);
         }
+
+        Ok(server_url)
+    }
+
+    /// Create a new `ClientConfig` by parsing a URL string and optional credentials.
+    pub fn new(
+        server_url_str: &str,
+        credentials: Option<AccountCredentials>,
+    ) -> Result<Self> {
+        let server_url = Self::normalize_url(server_url_str)?;
 
         Ok(Self {
             server_url,
@@ -125,6 +132,12 @@ mod tests {
 
         assert_eq!(config.server_url.as_str(), "https://cloud.example.com/");
         assert_eq!(config.credentials.as_ref().unwrap().username, "alice");
+    }
+
+    #[test]
+    fn test_subpath_normalization() {
+        let url = ClientConfig::normalize_url("https://disobedient.cloud/nextcloud").unwrap();
+        assert_eq!(url.as_str(), "https://disobedient.cloud/nextcloud/");
     }
 
     #[test]

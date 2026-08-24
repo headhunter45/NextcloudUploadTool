@@ -31,7 +31,7 @@ pub struct StoredAccount {
     #[serde(default)]
     pub is_default: bool,
 
-    /// Fallback password storage (only populated if system keyring is unavailable).
+    /// Fallback password storage (populated if system keyring is unavailable).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fallback_password: Option<String>,
 }
@@ -137,7 +137,7 @@ impl CredentialStore {
 
         let keyring_key = account.keyring_key();
 
-        // 1. Attempt retrieval from OS Keyring
+        // 1. Attempt retrieval from OS Keyring (using full id username@host)
         if let Ok(entry) = Entry::new(KEYRING_SERVICE_NAME, keyring_key) {
             if let Ok(password) = entry.get_password() {
                 let username = account.username.clone();
@@ -145,7 +145,7 @@ impl CredentialStore {
             }
         }
 
-        // Also try fallback by username alone if migrated
+        // Also try retrieval by username alone (if previously stored with just username)
         if let Ok(entry) = Entry::new(KEYRING_SERVICE_NAME, &account.username) {
             if let Ok(password) = entry.get_password() {
                 let username = account.username.clone();
@@ -158,7 +158,7 @@ impl CredentialStore {
             let username = account.username.clone();
             return Ok(Some((
                 account.clone(),
-                AccountCredentials::new(username, pass),
+                AccountCredentials::new(username, pass.clone()),
             )));
         }
 
@@ -168,14 +168,26 @@ impl CredentialStore {
     /// Retrieve the default/active account credentials.
     pub fn get_default_credentials() -> Result<Option<(StoredAccount, AccountCredentials)>> {
         let accounts = Self::list_accounts()?;
-        let default_id = accounts
+        if accounts.is_empty() {
+            return Ok(None);
+        }
+
+        let default_account = accounts
             .iter()
             .find(|a| a.is_default)
-            .map(|a| a.id.clone())
-            .or_else(|| accounts.first().map(|a| a.id.clone()));
+            .or_else(|| accounts.first());
 
-        match default_id {
-            Some(id) => Self::get_credentials(&id),
+        match default_account {
+            Some(acc) => match Self::get_credentials(&acc.id)? {
+                Some(res) => Ok(Some(res)),
+                None => Err(NextcloudError::AuthenticationFailed {
+                    username: acc.username.clone(),
+                    message: format!(
+                        "Account '{}' is registered, but its password was not found in Keychain. Please re-authenticate by running 'nut login {}'.",
+                        acc.id, acc.server_url
+                    ),
+                }),
+            },
             None => Ok(None),
         }
     }
@@ -227,10 +239,14 @@ impl CredentialStore {
 
         // Try storing password in OS Keyring
         let mut fallback_password = None;
-        let keyring_result = Entry::new(KEYRING_SERVICE_NAME, new_account.keyring_key())
-            .and_then(|entry| entry.set_password(app_password));
+        let entry_res = Entry::new(KEYRING_SERVICE_NAME, new_account.keyring_key());
+        let keyring_saved = match entry_res {
+            Ok(ref entry) => entry.set_password(app_password).is_ok(),
+            Err(_) => false,
+        };
 
-        if keyring_result.is_err() {
+        if !keyring_saved {
+            // Save in fallback password field on failure
             fallback_password = Some(app_password.to_string());
         }
         new_account.fallback_password = fallback_password;
@@ -283,7 +299,7 @@ impl CredentialStore {
     /// Create an initialized `NextcloudClient` for an account matching `query`.
     pub fn create_client_for_account(query: &str) -> Result<NextcloudClient> {
         let (account, creds) = Self::get_credentials(query)?.ok_or_else(|| {
-            NextcloudError::Other(format!("No credentials found for account '{query}'"))
+            NextcloudError::Other(format!("No credentials found for account '{query}'. Run 'nut login' to authenticate."))
         })?;
 
         let config = ClientConfig::new(&account.server_url, Some(creds))?;
@@ -293,7 +309,7 @@ impl CredentialStore {
     /// Create an initialized `NextcloudClient` for the default account.
     pub fn create_client_for_default() -> Result<NextcloudClient> {
         let (account, creds) = Self::get_default_credentials()?.ok_or_else(|| {
-            NextcloudError::Other("No default account configured. Please run 'nut login' or configure an account.".into())
+            NextcloudError::Other("No accounts configured. Please run 'nut login <server_url>' to connect your Nextcloud instance.".into())
         })?;
 
         let config = ClientConfig::new(&account.server_url, Some(creds))?;
