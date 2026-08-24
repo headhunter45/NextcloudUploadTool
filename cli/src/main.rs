@@ -1,4 +1,5 @@
 use clap::{Args, Parser, Subcommand};
+use serde::Serialize;
 use std::io::{self, Read};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -35,7 +36,7 @@ enum Commands {
     Account(AccountCommands),
 
     /// Quick alias to list all configured accounts
-    Accounts,
+    Accounts(AccountListArgs),
 }
 
 #[derive(Args, Debug)]
@@ -50,6 +51,35 @@ struct LoginArgs {
     /// Set this account as the default active account
     #[arg(short, long, default_value_t = true)]
     default: bool,
+}
+
+#[derive(Args, Debug, Clone, Default)]
+struct OutputFormatArgs {
+    /// Format output as JSON
+    #[arg(long, conflicts_with_all = ["tsv", "url_only", "direct_url_only"])]
+    json: bool,
+
+    /// Format output as Tab-Separated Values (TSV)
+    #[arg(long, conflicts_with_all = ["json", "url_only", "direct_url_only"])]
+    tsv: bool,
+
+    /// Output only the public share URL
+    #[arg(long, conflicts_with_all = ["json", "tsv", "direct_url_only"])]
+    url_only: bool,
+
+    /// Output only the direct download URL
+    #[arg(long, conflicts_with_all = ["json", "tsv", "url_only"])]
+    direct_url_only: bool,
+
+    /// Suppress progress and informational output
+    #[arg(short, long)]
+    quiet: bool,
+}
+
+impl OutputFormatArgs {
+    pub fn is_machine_readable(&self) -> bool {
+        self.json || self.tsv || self.url_only || self.direct_url_only || self.quiet
+    }
 }
 
 #[derive(Args, Debug)]
@@ -81,12 +111,15 @@ struct UploadArgs {
     /// Remote filename to use when uploading via stdin
     #[arg(long, default_value = "stdin_upload.txt")]
     filename: String,
+
+    #[command(flatten)]
+    format: OutputFormatArgs,
 }
 
 #[derive(Subcommand, Debug)]
 enum AccountCommands {
     /// List all configured Nextcloud accounts
-    List,
+    List(AccountListArgs),
 
     /// Set the active default account
     Default {
@@ -101,6 +134,28 @@ enum AccountCommands {
     },
 }
 
+#[derive(Args, Debug, Clone, Default)]
+struct AccountListArgs {
+    /// Format output as JSON
+    #[arg(long, conflicts_with = "tsv")]
+    json: bool,
+
+    /// Format output as Tab-Separated Values (TSV)
+    #[arg(long, conflicts_with = "json")]
+    tsv: bool,
+}
+
+#[derive(Debug, Clone, Serialize)]
+struct UploadRecord {
+    file: String,
+    remote_path: String,
+    bytes: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    share_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    direct_download_url: Option<String>,
+}
+
 #[tokio::main]
 async fn main() {
     let cli = Cli::parse();
@@ -108,7 +163,9 @@ async fn main() {
     let result = match cli.command {
         Commands::Login(args) => handle_login(args).await,
         Commands::Upload(args) => handle_upload(args).await,
-        Commands::Account(AccountCommands::List) | Commands::Accounts => handle_account_list(),
+        Commands::Account(AccountCommands::List(args)) | Commands::Accounts(args) => {
+            handle_account_list(args)
+        }
         Commands::Account(AccountCommands::Default { account }) => {
             handle_account_set_default(&account)
         }
@@ -185,45 +242,92 @@ async fn handle_login(args: LoginArgs) -> Result<()> {
 
 /// Handle file and stdin uploads.
 async fn handle_upload(args: UploadArgs) -> Result<()> {
+    if (args.format.url_only || args.format.direct_url_only) && !args.share {
+        return Err(nextcloud_client::NextcloudError::Other(
+            "Flag --url-only or --direct-url-only requires --share to generate a link.".into(),
+        ));
+    }
+
     let client = match args.account.as_deref() {
         Some(acc) => CredentialStore::create_client_for_account(acc)?,
         None => CredentialStore::create_client_for_default()?,
     };
 
+    let mut results: Vec<UploadRecord> = Vec::new();
+
     // Stdin Upload
     if args.stdin {
-        println!("\x1b[1;34m==>\x1b[0m Reading data from stdin...");
+        if !args.format.is_machine_readable() {
+            println!("\x1b[1;34m==>\x1b[0m Reading data from stdin...");
+        }
         let mut buffer = Vec::new();
         io::stdin().read_to_end(&mut buffer)?;
 
         let len = buffer.len() as u64;
-        let remote_path = format!("{}/{}", args.remote_dir.trim_matches('/'), args.filename);
-        println!("\x1b[1;34m==>\x1b[0m Uploading {} bytes to '{}'...", len, remote_path);
+        let clean_dir = args.remote_dir.trim_matches('/');
+        let remote_path = if clean_dir.is_empty() {
+            args.filename.clone()
+        } else {
+            format!("{clean_dir}/{}", args.filename)
+        };
 
-        let progress_cb = create_progress_callback(len);
+        if !args.format.is_machine_readable() {
+            println!("\x1b[1;34m==>\x1b[0m Uploading {} bytes to '{}'...", len, remote_path);
+        }
+
+        let progress_cb = if args.format.is_machine_readable() {
+            None
+        } else {
+            Some(create_progress_callback(len))
+        };
+
         let cursor = io::Cursor::new(buffer);
         let bytes = client
-            .upload_reader(cursor, &remote_path, Some(len), Some(progress_cb))
+            .upload_reader(cursor, &remote_path, Some(len), progress_cb)
             .await?;
 
-        println!("\n\x1b[1;32m✓\x1b[0m Upload complete! ({} bytes)", bytes);
+        let mut share_url = None;
+        let mut direct_download_url = None;
 
         if args.share {
-            create_and_print_share(&client, &remote_path, args.password.as_deref()).await?;
+            if !args.format.is_machine_readable() {
+                println!("\x1b[1;34m==>\x1b[0m Generating public share link...");
+            }
+            let share = client.create_public_share(&remote_path, args.password.as_deref()).await?;
+            let direct = client.direct_download_url(&share.token)?;
+            share_url = Some(share.url);
+            direct_download_url = Some(direct.to_string());
         }
-        return Ok(());
+
+        results.push(UploadRecord {
+            file: "stdin".to_string(),
+            remote_path,
+            bytes,
+            share_url,
+            direct_download_url,
+        });
+    } else {
+        if args.files.is_empty() {
+            return Err(nextcloud_client::NextcloudError::Other(
+                "No files specified for upload. Usage: nut upload <FILE>... or nut upload --stdin".into(),
+            ));
+        }
+
+        for file_path in &args.files {
+            let record = upload_single_file(
+                &client,
+                file_path,
+                &args.remote_dir,
+                args.share,
+                args.password.as_deref(),
+                &args.format,
+            )
+            .await?;
+            results.push(record);
+        }
     }
 
-    if args.files.is_empty() {
-        return Err(nextcloud_client::NextcloudError::Other(
-            "No files specified for upload. Usage: nut upload <FILE>... or nut upload --stdin".into(),
-        ));
-    }
-
-    for file_path in &args.files {
-        upload_single_file(&client, file_path, &args.remote_dir, args.share, args.password.as_deref()).await?;
-    }
-
+    render_upload_results(&results, &args.format);
     Ok(())
 }
 
@@ -233,7 +337,8 @@ async fn upload_single_file(
     remote_dir: &str,
     create_share: bool,
     password: Option<&str>,
-) -> Result<()> {
+    format: &OutputFormatArgs,
+) -> Result<UploadRecord> {
     if !local_path.exists() {
         return Err(nextcloud_client::NextcloudError::NotFound {
             path: local_path.display().to_string(),
@@ -255,9 +360,16 @@ async fn upload_single_file(
     let metadata = tokio::fs::metadata(local_path).await?;
     let file_size = metadata.len();
 
-    println!("\x1b[1;34m==>\x1b[0m Uploading '{}' ({} bytes) -> '{}'...", local_path.display(), file_size, remote_path);
+    if !format.is_machine_readable() {
+        println!("\x1b[1;34m==>\x1b[0m Uploading '{}' ({} bytes) -> '{}'...", local_path.display(), file_size, remote_path);
+    }
 
-    let progress_cb = create_progress_callback(file_size);
+    let progress_cb = if format.is_machine_readable() {
+        None
+    } else {
+        Some(create_progress_callback(file_size))
+    };
+
     let options = UploadOptions {
         remote_path: remote_path.clone(),
         create_share,
@@ -266,33 +378,82 @@ async fn upload_single_file(
     };
 
     let result = client
-        .upload_and_share(local_path, &options, Some(progress_cb))
+        .upload_and_share(local_path, &options, progress_cb)
         .await?;
 
-    println!("\n\x1b[1;32m✓\x1b[0m Uploaded '{}' ({} bytes)", file_name, result.bytes_uploaded);
-
-    if let Some(share_url) = result.share_url {
-        println!("  \x1b[1;32mShare Link:\x1b[0m       {}", share_url);
-    }
-    if let Some(direct_url) = result.direct_download_url {
-        println!("  \x1b[1;32mDirect Download:\x1b[0m  {}", direct_url);
-    }
-
-    Ok(())
+    Ok(UploadRecord {
+        file: local_path.display().to_string(),
+        remote_path,
+        bytes: result.bytes_uploaded,
+        share_url: result.share_url,
+        direct_download_url: result.direct_download_url,
+    })
 }
 
-async fn create_and_print_share(
-    client: &NextcloudClient,
-    remote_path: &str,
-    password: Option<&str>,
-) -> Result<()> {
-    println!("\x1b[1;34m==>\x1b[0m Generating public share link...");
-    let share = client.create_public_share(remote_path, password).await?;
-    let direct_url = client.direct_download_url(&share.token)?;
+fn render_upload_results(results: &[UploadRecord], format: &OutputFormatArgs) {
+    if format.json {
+        if results.len() == 1 {
+            println!("{}", serde_json::to_string_pretty(&results[0]).unwrap());
+        } else {
+            println!("{}", serde_json::to_string_pretty(&results).unwrap());
+        }
+        return;
+    }
 
-    println!("  \x1b[1;32mShare Link:\x1b[0m       {}", share.url);
-    println!("  \x1b[1;32mDirect Download:\x1b[0m  {}", direct_url);
-    Ok(())
+    if format.tsv {
+        for r in results {
+            println!(
+                "{}\t{}\t{}\t{}\t{}",
+                r.file,
+                r.remote_path,
+                r.bytes,
+                r.share_url.as_deref().unwrap_or(""),
+                r.direct_download_url.as_deref().unwrap_or("")
+            );
+        }
+        return;
+    }
+
+    if format.url_only {
+        for r in results {
+            if let Some(ref url) = r.share_url {
+                println!("{url}");
+            }
+        }
+        return;
+    }
+
+    if format.direct_url_only {
+        for r in results {
+            if let Some(ref url) = r.direct_download_url {
+                println!("{url}");
+            }
+        }
+        return;
+    }
+
+    if format.quiet {
+        // Quiet mode: if share URL exists, print that, otherwise print remote path
+        for r in results {
+            if let Some(ref url) = r.share_url {
+                println!("{url}");
+            } else {
+                println!("{}", r.remote_path);
+            }
+        }
+        return;
+    }
+
+    // Default human-readable terminal output
+    for r in results {
+        println!("\n\x1b[1;32m✓\x1b[0m Uploaded '{}' ({} bytes)", r.file, r.bytes);
+        if let Some(ref share_url) = r.share_url {
+            println!("  \x1b[1;32mShare Link:\x1b[0m       {}", share_url);
+        }
+        if let Some(ref direct_url) = r.direct_download_url {
+            println!("  \x1b[1;32mDirect Download:\x1b[0m  {}", direct_url);
+        }
+    }
 }
 
 fn create_progress_callback(total_bytes: u64) -> ProgressCallback {
@@ -316,8 +477,28 @@ fn create_progress_callback(total_bytes: u64) -> ProgressCallback {
 }
 
 /// List stored accounts.
-fn handle_account_list() -> Result<()> {
+fn handle_account_list(args: AccountListArgs) -> Result<()> {
     let accounts = CredentialStore::list_accounts()?;
+
+    if args.json {
+        println!("{}", serde_json::to_string_pretty(&accounts)?);
+        return Ok(());
+    }
+
+    if args.tsv {
+        for acc in &accounts {
+            println!(
+                "{}\t{}\t{}\t{}\t{}",
+                acc.id,
+                acc.username,
+                acc.server_url,
+                acc.is_default,
+                acc.label.as_deref().unwrap_or("")
+            );
+        }
+        return Ok(());
+    }
+
     if accounts.is_empty() {
         println!("No Nextcloud accounts configured yet.");
         println!("Run \x1b[1;36mnut login <SERVER_URL>\x1b[0m to connect an account.");
