@@ -70,7 +70,6 @@ This document defines the complete project roadmap and task tracking system for 
 
 | ID | Title | Status | Type |
 |---|---|---|---|
-| [NUT-016](#nut-016) | Implement Shared Auth Token Reuse | Triage | Integration |
 | [NUT-017](#nut-017) | Implement Multi-Account Switching (GUI + CLI) | Triage | Integration |
 | [NUT-018](#nut-018) | Implement Packaging for macOS, Windows, Linux | Triage | Chore |
 | [NUT-019](#nut-019) | Implement Homebrew/Winget/Chocolatey Manifests | Triage | Chore |
@@ -93,6 +92,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-013](#nut-013) | Implement GUI File Queue + Drag-and-Drop | Fixed | Feature |
 | [NUT-014](#nut-014) | Implement GUI Credential Management UI | Fixed | Feature |
 | [NUT-015](#nut-015) | Implement GUI Upload Progress Bars | Fixed | Feature |
+| [NUT-016](#nut-016) | Implement Shared Auth Token Reuse | Fixed | Integration |
 | [NUT-021](#nut-021) | Support Headless & SSH Remote Authentication Modes | Fixed | Feature |
 
 ---
@@ -402,19 +402,19 @@ Add per-file and total progress bars to the GUI.
 - NUT-013
 
 
-<a id="nut-016" class="task" data-status="triage" data-task-type="integration"></a>
+<a id="nut-016" class="task" data-status="done" data-task-type="integration"></a>
 ### Implement Shared Auth Token Reuse  
 **ID:** NUT-016  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Integration  
 
 **Description:**  
 Ensure both CLI and GUI reuse the same credential store and cached tokens.
 
 **Requirements:**  
-- [ ] Shared credential backend  
-- [ ] Shared token cache  
-- [ ] Unified config format  
+- [x] Shared credential backend  
+- [x] Shared token cache  
+- [x] Unified config format  
 
 **Dependencies:**  
 - NUT-006  

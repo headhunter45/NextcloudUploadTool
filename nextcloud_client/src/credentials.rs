@@ -345,4 +345,42 @@ mod tests {
         let deserialized: StoredAccount = serde_json::from_str(&json).unwrap();
         assert_eq!(deserialized, account);
     }
+
+    #[test]
+    fn test_unified_config_accounts_parsing() {
+        let json_data = r#"[
+            {
+                "id": "alice@cloud.example.com",
+                "label": "Work",
+                "username": "alice",
+                "server_url": "https://cloud.example.com",
+                "is_default": true,
+                "fallback_password": "app-password-token"
+            },
+            {
+                "id": "bob@personal.nextcloud.com",
+                "label": "Personal",
+                "username": "bob",
+                "server_url": "https://personal.nextcloud.com",
+                "is_default": false
+            }
+        ]"#;
+
+        let accounts: Vec<StoredAccount> = serde_json::from_str(json_data).unwrap();
+        assert_eq!(accounts.len(), 2);
+        assert_eq!(accounts[0].id, "alice@cloud.example.com");
+        assert_eq!(accounts[0].label.as_deref(), Some("Work"));
+        assert!(accounts[0].is_default);
+        assert_eq!(accounts[0].fallback_password.as_deref(), Some("app-password-token"));
+
+        assert_eq!(accounts[1].id, "bob@personal.nextcloud.com");
+        assert_eq!(accounts[1].label.as_deref(), Some("Personal"));
+        assert!(!accounts[1].is_default);
+        assert_eq!(accounts[1].fallback_password, None);
+    }
+
+    #[test]
+    fn test_keyring_constants() {
+        assert_eq!(KEYRING_SERVICE_NAME, "me.majinnaibu.nut");
+    }
 }
