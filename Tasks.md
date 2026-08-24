@@ -66,12 +66,10 @@ This document defines the complete project roadmap and task tracking system for 
 ---
 
 <a id="tasks-summary"></a>
-## Tasks Summary (Rendered from task details)
+## Tasks Summary (Rendered from task-details)
 
 | ID | Title | Status | Type |
 |---|---|---|---|
-| [NUT-014](#nut-014) | Implement GUI Credential Management UI | Triage | Feature |
-| [NUT-015](#nut-015) | Implement GUI Upload Progress Bars | Triage | Feature |
 | [NUT-016](#nut-016) | Implement Shared Auth Token Reuse | Triage | Integration |
 | [NUT-017](#nut-017) | Implement Multi-Account Switching (GUI + CLI) | Triage | Integration |
 | [NUT-018](#nut-018) | Implement Packaging for macOS, Windows, Linux | Triage | Chore |
@@ -93,6 +91,8 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-011](#nut-011) | Implement CLI Progress Reporting + pv Support | Fixed | Feature |
 | [NUT-012](#nut-012) | Implement GUI (Tauri) Frontend | Fixed | Feature |
 | [NUT-013](#nut-013) | Implement GUI File Queue + Drag-and-Drop | Fixed | Feature |
+| [NUT-014](#nut-014) | Implement GUI Credential Management UI | Fixed | Feature |
+| [NUT-015](#nut-015) | Implement GUI Upload Progress Bars | Fixed | Feature |
 | [NUT-021](#nut-021) | Support Headless & SSH Remote Authentication Modes | Fixed | Feature |
 
 ---
@@ -361,40 +361,40 @@ Add drag-and-drop file support and a queue system for multiple uploads.
 - NUT-012
 
 
-<a id="nut-014" class="task" data-status="triage" data-task-type="feature"></a>
+<a id="nut-014" class="task" data-status="done" data-task-type="feature"></a>
 ### Implement GUI Credential Management UI  
 **ID:** NUT-014  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Feature  
 
 **Description:**  
 Add UI for managing accounts, logging in (including one-click browser authorization via Login Flow v2), logging out, and switching accounts.
 
 **Requirements:**  
-- [ ] Account list UI  
-- [ ] Browser-based login button (Login Flow v2)  
-- [ ] Manual login form (server/user/token)  
-- [ ] Logout button  
-- [ ] Switch account dropdown  
+- [x] Account list UI  
+- [x] Browser-based login button (Login Flow v2)  
+- [x] Manual login form (server/user/token)  
+- [x] Logout button  
+- [x] Switch account dropdown  
 
 **Dependencies:**  
 - NUT-007  
 - NUT-012
 
 
-<a id="nut-015" class="task" data-status="triage" data-task-type="feature"></a>
+<a id="nut-015" class="task" data-status="done" data-task-type="feature"></a>
 ### Implement GUI Upload Progress Bars  
 **ID:** NUT-015  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Feature  
 
 **Description:**  
 Add per-file and total progress bars to the GUI.
 
 **Requirements:**  
-- [ ] Per-file progress  
-- [ ] Total progress  
-- [ ] Error display  
+- [x] Per-file progress  
+- [x] Total progress  
+- [x] Error display  
 
 **Dependencies:**  
 - NUT-003  

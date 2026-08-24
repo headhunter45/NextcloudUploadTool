@@ -1,11 +1,13 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
+use std::sync::Arc;
+use tauri::Emitter;
 
 use nextcloud_client::{
     initiate_login_flow as api_initiate_login_flow,
     poll_login_flow as api_poll_login_flow,
-    ClientConfig, CredentialStore, NextcloudClient, StoredAccount, UploadOptions,
+    ClientConfig, CredentialStore, NextcloudClient, ProgressEvent, StoredAccount, UploadOptions,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -30,6 +32,13 @@ pub struct GuiUploadResult {
     pub bytes_uploaded: u64,
     pub share_url: Option<String>,
     pub direct_download_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct GuiUploadProgressPayload {
+    pub file_path: String,
+    pub bytes_transferred: u64,
+    pub total_bytes: Option<u64>,
 }
 
 #[tauri::command]
@@ -184,6 +193,7 @@ pub fn get_file_info(file_path: String) -> Result<FileInfo, String> {
 
 #[tauri::command]
 pub async fn upload_file(
+    app: tauri::AppHandle,
     file_path: String,
     remote_dir: String,
     create_share: bool,
@@ -222,8 +232,23 @@ pub async fn upload_file(
         overwrite: true,
     };
 
+    let app_handle = app.clone();
+    let fp = file_path.clone();
+    let progress_cb: nextcloud_client::ProgressCallback = Arc::new(move |event| {
+        if let ProgressEvent::Progress { bytes_transferred, total_bytes } = event {
+            let _ = app_handle.emit(
+                "upload-progress",
+                GuiUploadProgressPayload {
+                    file_path: fp.clone(),
+                    bytes_transferred,
+                    total_bytes,
+                },
+            );
+        }
+    });
+
     let res = client
-        .upload_and_share(&local_path, &options, None)
+        .upload_and_share(&local_path, &options, Some(progress_cb))
         .await
         .map_err(|e| e.to_string())?;
 
@@ -239,7 +264,7 @@ pub async fn upload_file(
 
 #[cfg(test)]
 mod tests {
-    use super::{FileInfo, GuiUploadResult, LoginFlowInitPayload};
+    use super::{FileInfo, GuiUploadProgressPayload, GuiUploadResult, LoginFlowInitPayload};
 
     #[test]
     fn test_login_flow_payload_serialization() {
@@ -265,6 +290,19 @@ mod tests {
         let json = serde_json::to_string(&file_info).unwrap();
         let deserialized: FileInfo = serde_json::from_str(&json).unwrap();
         assert_eq!(file_info, deserialized);
+    }
+
+    #[test]
+    fn test_upload_progress_payload_serialization() {
+        let payload = GuiUploadProgressPayload {
+            file_path: "/tmp/sample.iso".to_string(),
+            bytes_transferred: 5242880,
+            total_bytes: Some(10485760),
+        };
+
+        let json = serde_json::to_string(&payload).unwrap();
+        let deserialized: GuiUploadProgressPayload = serde_json::from_str(&json).unwrap();
+        assert_eq!(payload, deserialized);
     }
 
     #[test]
