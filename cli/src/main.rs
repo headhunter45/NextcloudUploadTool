@@ -2,7 +2,7 @@ use clap::{Args, Parser, Subcommand};
 use indicatif::{ProgressBar, ProgressDrawTarget, ProgressStyle};
 use serde::Serialize;
 use std::fs;
-use std::io::{self, IsTerminal, Read};
+use std::io::{self, IsTerminal, Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
@@ -27,7 +27,7 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    /// Log in to a Nextcloud server using browser authorization (Login Flow v2)
+    /// Log in to a Nextcloud server using browser authorization (Login Flow v2) or credentials
     Login(LoginArgs),
 
     /// Upload a file or stream to Nextcloud
@@ -53,6 +53,22 @@ struct LoginArgs {
     /// Set this account as the default active account
     #[arg(short, long, default_value_t = true)]
     default: bool,
+
+    /// Do not automatically open a desktop browser; print authorization URL in terminal
+    #[arg(long)]
+    no_browser: bool,
+
+    /// Prompt interactively for username and app password in terminal
+    #[arg(short, long, conflicts_with_all = ["username", "app_password"])]
+    manual: bool,
+
+    /// Username for non-interactive / automated login
+    #[arg(short = 'u', long, requires = "app_password")]
+    username: Option<String>,
+
+    /// App password or token for non-interactive / automated login
+    #[arg(short = 'p', long, requires = "username")]
+    app_password: Option<String>,
 }
 
 #[derive(Args, Debug, Clone, Default)]
@@ -199,24 +215,63 @@ async fn main() {
     }
 }
 
-/// Handle interactive browser login flow.
+/// Handle interactive or non-interactive login flows.
 async fn handle_login(args: LoginArgs) -> Result<()> {
     let server_url = ClientConfig::normalize_url(&args.server_url)?;
-    let http = reqwest::Client::new();
+    let server_url_str = server_url.as_str();
 
-    println!("\x1b[1;34m==>\x1b[0m Initiating Nextcloud authentication with {}", server_url);
+    // 1. Non-interactive CLI flag input (--username & --app-password)
+    if let (Some(username), Some(password)) = (args.username.as_deref(), args.app_password.as_deref()) {
+        println!("\x1b[1;34m==>\x1b[0m Validating credentials for '{}' on {}...", username, server_url_str);
+        return save_and_verify_account(server_url_str, username, password, args.default, args.label).await;
+    }
+
+    // 2. Interactive manual terminal prompt (--manual)
+    if args.manual {
+        println!("\x1b[1;34m==>\x1b[0m Manual Nextcloud Login for {}", server_url_str);
+        print!("    Username: ");
+        io::stdout().flush()?;
+        let mut username = String::new();
+        io::stdin().read_line(&mut username)?;
+        let username = username.trim();
+
+        if username.is_empty() {
+            return Err(nextcloud_client::NextcloudError::Other("Username cannot be empty".into()));
+        }
+
+        print!("    App Password / Token: ");
+        io::stdout().flush()?;
+        let password = rpassword::read_password()
+            .map_err(|e| nextcloud_client::NextcloudError::Other(format!("Failed to read password: {e}")))?;
+        let password = password.trim();
+
+        if password.is_empty() {
+            return Err(nextcloud_client::NextcloudError::Other("Password cannot be empty".into()));
+        }
+
+        println!("\x1b[1;34m==>\x1b[0m Verifying connection...");
+        return save_and_verify_account(server_url_str, username, password, args.default, args.label).await;
+    }
+
+    // 3. Browser-based Login Flow v2 (default)
+    let http = reqwest::Client::new();
+    println!("\x1b[1;34m==>\x1b[0m Initiating Nextcloud authentication with {}", server_url_str);
     let flow = initiate_login_flow(&http, &server_url).await?;
 
     println!("\x1b[1;32m==>\x1b[0m Please authorize access in your browser:");
     println!("    \x1b[1;36m{}\x1b[0m\n", flow.login);
 
-    // Attempt to open the default desktop browser
-    if open::that(&flow.login).is_err() {
-        println!("    (Could not automatically launch browser. Please copy and open the link above.)");
+    if !args.no_browser {
+        // Attempt to open the default desktop browser
+        if open::that(&flow.login).is_err() {
+            println!("    (Could not automatically launch browser. Please copy and open the link above.)");
+        }
+    } else {
+        println!("    (Headless mode: copy and paste the URL above into any browser)");
     }
 
     print!("\x1b[1;33m==>\x1b[0m Waiting for browser authorization...");
-    io::Write::flush(&mut io::stdout())?;
+    io::stdout().flush()?;
 
     let poll_interval = Duration::from_secs(2);
     let timeout = Duration::from_secs(300); // 5 minute timeout
@@ -259,6 +314,37 @@ async fn handle_login(args: LoginArgs) -> Result<()> {
             return Ok(());
         }
     }
+}
+
+async fn save_and_verify_account(
+    server_url: &str,
+    username: &str,
+    password: &str,
+    is_default: bool,
+    label: Option<String>,
+) -> Result<()> {
+    let config = ClientConfig::with_credentials(server_url, username, password)?;
+    let client = NextcloudClient::new(config)?;
+
+    // Verify authentication and connectivity
+    client.test_connection().await?;
+
+    let mut account = CredentialStore::save_account(server_url, username, password, is_default)?;
+
+    if let Some(lbl) = label {
+        account.label = Some(lbl);
+        let mut accounts = CredentialStore::list_accounts()?;
+        if let Some(a) = accounts.iter_mut().find(|a| a.id == account.id) {
+            a.label = account.label.clone();
+        }
+        CredentialStore::save_accounts(&accounts)?;
+    }
+
+    println!("\x1b[1;32m✓\x1b[0m Successfully authenticated! Account '\x1b[1m{}\x1b[0m' saved securely.", account.id);
+    if account.is_default {
+        println!("    Set as default active account.");
+    }
+    Ok(())
 }
 
 /// Handle file and stdin uploads.

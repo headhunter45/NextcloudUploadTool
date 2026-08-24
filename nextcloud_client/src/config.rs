@@ -105,6 +105,18 @@ impl ClientConfig {
         })
     }
 
+    /// Create a new `ClientConfig` with username and app password credentials.
+    pub fn with_credentials(
+        server_url_str: &str,
+        username: impl Into<String>,
+        app_password: impl Into<String>,
+    ) -> Result<Self> {
+        Self::new(
+            server_url_str,
+            Some(AccountCredentials::new(username, app_password)),
+        )
+    }
+
     /// Set a custom request timeout.
     pub fn with_timeout(mut self, timeout: Duration) -> Self {
         self.timeout = timeout;

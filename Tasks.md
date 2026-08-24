@@ -78,7 +78,6 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-018](#nut-018) | Implement Packaging for macOS, Windows, Linux | Triage | Chore |
 | [NUT-019](#nut-019) | Implement Homebrew/Winget/Chocolatey Manifests | Triage | Chore |
 | [NUT-020](#nut-020) | Write Documentation + Examples | Triage | Chore |
-| [NUT-021](#nut-021) | Support Headless & SSH Remote Authentication Modes | Triage | Feature |
 | [NUT-001](#nut-001) | Establish Repository Structure | Fixed | Foundation |
 | [NUT-002](#nut-002) | Implement Shared Rust Backend Library | Fixed | Foundation |
 | [NUT-003](#nut-003) | Implement WebDAV Upload Logic | Fixed | Feature |
@@ -90,6 +89,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-009](#nut-009) | Implement CLI Output Formatting Options | Fixed | Feature |
 | [NUT-010](#nut-010) | Implement CLI Multi-file Upload Support | Fixed | Feature |
 | [NUT-011](#nut-011) | Implement CLI Progress Reporting + pv Support | Fixed | Feature |
+| [NUT-021](#nut-021) | Support Headless & SSH Remote Authentication Modes | Fixed | Feature |
 
 ---
 
@@ -497,20 +497,20 @@ Write documentation for installation, usage, examples, and API reference.
 - NUT-018
 
 
-<a id="nut-021" class="task" data-status="triage" data-task-type="feature"></a>
+<a id="nut-021" class="task" data-status="done" data-task-type="feature"></a>
 ### Support Headless & SSH Remote Authentication Modes  
 **ID:** NUT-021  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Feature  
 
 **Description:**  
 Ensure smooth authentication experiences when running the CLI over SSH or in headless environments where a local graphical browser cannot be launched automatically.
 
 **Requirements:**  
-- [ ] Terminal URL fallback: print clickable Login Flow v2 URL in terminal when browser fails to launch  
-- [ ] Add `--no-browser` flag to print URL and wait for authorization without attempting to open desktop browser  
-- [ ] Add interactive manual terminal prompt (`--manual`) for username and app password input  
-- [ ] Add non-interactive flag inputs (`--username`, `--app-password`) for automated provisioning and CI/CD  
+- [x] Terminal URL fallback: print clickable Login Flow v2 URL in terminal when browser fails to launch  
+- [x] Add `--no-browser` flag to print URL and wait for authorization without attempting to open desktop browser  
+- [x] Add interactive manual terminal prompt (`--manual`) for username and app password input  
+- [x] Add non-interactive flag inputs (`--username`, `--app-password`) for automated provisioning and CI/CD  
 
 **Dependencies:**  
 - NUT-006  

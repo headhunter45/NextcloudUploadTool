@@ -45,7 +45,6 @@ impl NextcloudClient {
 
         // Set Basic Auth header if credentials are provided
         if let Some(ref creds) = config.credentials {
-            use reqwest::header::HeaderValue;
             let raw_auth = format!("{}:{}", creds.username, creds.app_password);
             let encoded = base64_encode(raw_auth.as_bytes());
             let mut auth_val = HeaderValue::from_str(&format!("Basic {encoded}"))
@@ -123,6 +122,32 @@ impl NextcloudClient {
             .error_for_status()?;
 
         let status = response.json::<ServerStatus>().await?;
+        Ok(status)
+    }
+
+    /// Test server connectivity and verify user credentials via WebDAV PROPFIND.
+    pub async fn test_connection(&self) -> Result<ServerStatus> {
+        let status = self.check_status().await?;
+
+        if let Some(username) = self.username() {
+            let root_dav = self.webdav_url("")?;
+            let res = self
+                .http
+                .request(reqwest::Method::from_bytes(b"PROPFIND").unwrap(), root_dav)
+                .header("Depth", "0")
+                .send()
+                .await?;
+
+            if res.status() == reqwest::StatusCode::UNAUTHORIZED {
+                return Err(NextcloudError::AuthenticationFailed {
+                    username: username.to_string(),
+                    message: "Invalid credentials or unauthorized access".to_string(),
+                });
+            }
+
+            res.error_for_status()?;
+        }
+
         Ok(status)
     }
 
