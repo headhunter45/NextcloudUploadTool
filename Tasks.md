@@ -71,7 +71,6 @@ This document defines the complete project roadmap and task tracking system for 
 | ID | Title | Status | Type |
 |---|---|---|---|
 | [NUT-019](#nut-019) | Implement Homebrew/Winget/Chocolatey Manifests | Triage | Chore |
-| [NUT-020](#nut-020) | Write Documentation + Examples | Triage | Chore |
 | [NUT-022](#nut-022) | Implement CLI Shell Completions Generation | Triage | Feature |
 | [NUT-023](#nut-023) | Write Comprehensive CLI Documentation and Automation Guides | Triage | Chore |
 | [NUT-024](#nut-024) | Create Docker/Podman Nextcloud Integration Test Harness | Triage | Foundation |
@@ -93,6 +92,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-016](#nut-016) | Implement Shared Auth Token Reuse | Fixed | Integration |
 | [NUT-017](#nut-017) | Implement Multi-Account Switching (GUI + CLI) | Fixed | Integration |
 | [NUT-018](#nut-018) | Implement Packaging for macOS, Windows, Linux | Fixed | Chore |
+| [NUT-020](#nut-020) | Write Documentation + Examples | Fixed | Chore |
 | [NUT-021](#nut-021) | Support Headless & SSH Remote Authentication Modes | Fixed | Feature |
 
 ---
@@ -481,20 +481,20 @@ Add package manager manifests for easy installation.
 - NUT-018
 
 
-<a id="nut-020" class="task" data-status="triage" data-task-type="chore"></a>
+<a id="nut-020" class="task" data-status="done" data-task-type="chore"></a>
 ### Write Documentation + Examples  
 **ID:** NUT-020  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Chore  
 
 **Description:**  
 Write comprehensive project documentation covering installation, GUI usage, multi-account setup, and overall project architecture.
 
 **Requirements:**  
-- [ ] GUI overview and visual walkthrough  
-- [ ] Cross-platform installation instructions  
-- [ ] Multi-account management guide  
-- [ ] Architecture and developer setup documentation  
+- [x] GUI overview and visual walkthrough  
+- [x] Cross-platform installation instructions  
+- [x] Multi-account management guide  
+- [x] Architecture and developer setup documentation  
 
 **Dependencies:**  
 - NUT-012  
