@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::fs;
 use std::path::PathBuf;
 
 use nextcloud_client::{
@@ -12,6 +13,13 @@ pub struct LoginFlowInitPayload {
     pub login_url: String,
     pub poll_endpoint: String,
     pub poll_token: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct FileInfo {
+    pub path: String,
+    pub name: String,
+    pub size: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -155,6 +163,26 @@ pub async fn select_files() -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
+pub fn get_file_info(file_path: String) -> Result<FileInfo, String> {
+    let path = PathBuf::from(&file_path);
+    if !path.exists() {
+        return Err(format!("File '{}' does not exist", file_path));
+    }
+    let metadata = fs::metadata(&path).map_err(|e| e.to_string())?;
+    let name = path
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("file")
+        .to_string();
+
+    Ok(FileInfo {
+        path: file_path,
+        name,
+        size: metadata.len(),
+    })
+}
+
+#[tauri::command]
 pub async fn upload_file(
     file_path: String,
     remote_dir: String,
@@ -211,7 +239,7 @@ pub async fn upload_file(
 
 #[cfg(test)]
 mod tests {
-    use super::{GuiUploadResult, LoginFlowInitPayload};
+    use super::{FileInfo, GuiUploadResult, LoginFlowInitPayload};
 
     #[test]
     fn test_login_flow_payload_serialization() {
@@ -224,6 +252,19 @@ mod tests {
         let json = serde_json::to_string(&payload).unwrap();
         let deserialized: LoginFlowInitPayload = serde_json::from_str(&json).unwrap();
         assert_eq!(payload, deserialized);
+    }
+
+    #[test]
+    fn test_file_info_serialization() {
+        let file_info = FileInfo {
+            path: "/path/to/document.pdf".to_string(),
+            name: "document.pdf".to_string(),
+            size: 2048,
+        };
+
+        let json = serde_json::to_string(&file_info).unwrap();
+        let deserialized: FileInfo = serde_json::from_str(&json).unwrap();
+        assert_eq!(file_info, deserialized);
     }
 
     #[test]

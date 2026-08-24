@@ -70,7 +70,6 @@ This document defines the complete project roadmap and task tracking system for 
 
 | ID | Title | Status | Type |
 |---|---|---|---|
-| [NUT-013](#nut-013) | Implement GUI File Queue + Drag-and-Drop | Triage | Feature |
 | [NUT-014](#nut-014) | Implement GUI Credential Management UI | Triage | Feature |
 | [NUT-015](#nut-015) | Implement GUI Upload Progress Bars | Triage | Feature |
 | [NUT-016](#nut-016) | Implement Shared Auth Token Reuse | Triage | Integration |
@@ -93,6 +92,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-010](#nut-010) | Implement CLI Multi-file Upload Support | Fixed | Feature |
 | [NUT-011](#nut-011) | Implement CLI Progress Reporting + pv Support | Fixed | Feature |
 | [NUT-012](#nut-012) | Implement GUI (Tauri) Frontend | Fixed | Feature |
+| [NUT-013](#nut-013) | Implement GUI File Queue + Drag-and-Drop | Fixed | Feature |
 | [NUT-021](#nut-021) | Support Headless & SSH Remote Authentication Modes | Fixed | Feature |
 
 ---
@@ -343,19 +343,19 @@ Implement the Tauri-based GUI application with a clean, responsive layout connec
 - NUT-006
 
 
-<a id="nut-013" class="task" data-status="triage" data-task-type="feature"></a>
+<a id="nut-013" class="task" data-status="done" data-task-type="feature"></a>
 ### Implement GUI File Queue + Drag-and-Drop  
 **ID:** NUT-013  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Feature  
 
 **Description:**  
 Add drag-and-drop file support and a queue system for multiple uploads.
 
 **Requirements:**  
-- [ ] Drag-and-drop area  
-- [ ] File queue list  
-- [ ] Remove/reorder items  
+- [x] Drag-and-drop area  
+- [x] File queue list  
+- [x] Remove/reorder items  
 
 **Dependencies:**  
 - NUT-012

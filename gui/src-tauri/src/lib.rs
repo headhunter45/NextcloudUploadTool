@@ -13,6 +13,7 @@ pub fn run() {
             commands::poll_login_flow,
             commands::manual_login,
             commands::select_files,
+            commands::get_file_info,
             commands::upload_file
         ])
         .run(tauri::generate_context!())
