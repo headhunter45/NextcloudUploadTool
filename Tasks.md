@@ -71,7 +71,6 @@ This document defines the complete project roadmap and task tracking system for 
 | ID | Title | Status | Type |
 |---|---|---|---|
 | [NUT-019](#nut-019) | Implement Homebrew/Winget/Chocolatey Manifests | Triage | Chore |
-| [NUT-023](#nut-023) | Write Comprehensive CLI Documentation and Automation Guides | Triage | Chore |
 | [NUT-024](#nut-024) | Create Docker/Podman Nextcloud Integration Test Harness | Triage | Foundation |
 | [NUT-001](#nut-001) | Establish Repository Structure | Fixed | Foundation |
 | [NUT-002](#nut-002) | Implement Shared Rust Backend Library | Fixed | Foundation |
@@ -94,6 +93,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-020](#nut-020) | Write Documentation + Examples | Fixed | Chore |
 | [NUT-021](#nut-021) | Support Headless & SSH Remote Authentication Modes | Fixed | Feature |
 | [NUT-022](#nut-022) | Implement CLI Shell Completions Generation | Fixed | Feature |
+| [NUT-023](#nut-023) | Write Comprehensive CLI Documentation and Automation Guides | Fixed | Chore |
 
 ---
 
@@ -541,20 +541,20 @@ Add automated shell completion script generation using `clap_complete` for major
 - NUT-008
 
 
-<a id="nut-023" class="task" data-status="triage" data-task-type="chore"></a>
+<a id="nut-023" class="task" data-status="done" data-task-type="chore"></a>
 ### Write Comprehensive CLI Documentation and Automation Guides  
 **ID:** NUT-023  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Chore  
 
 **Description:**  
 Write dedicated CLI reference documentation and practical automation guides for scripting, CI/CD, and Unix pipeline workflows.
 
 **Requirements:**  
-- [ ] Document all CLI subcommands (`login`, `upload`, `accounts`, `completions`) and flags in `README.md`  
-- [ ] Provide practical recipes for piping data (`stdin`, `pv`, `curl`, `mysqldump`)  
-- [ ] Provide scripting examples parsing `--json`, `--tsv`, `--url-only`, and `--direct-url-only` with `jq` and `xargs`  
-- [ ] Document headless SSH and CI/CD automated provisioning with `--username` and `--app-password`  
+- [x] Document all CLI subcommands (`login`, `upload`, `accounts`, `completions`) and flags in `README.md`  
+- [x] Provide practical recipes for piping data (`stdin`, `pv`, `curl`, `mysqldump`)  
+- [x] Provide scripting examples parsing `--json`, `--tsv`, `--url-only`, and `--direct-url-only` with `jq` and `xargs`  
+- [x] Document headless SSH and CI/CD automated provisioning with `--username` and `--app-password`  
 
 **Dependencies:**  
 - NUT-008  

@@ -15,11 +15,14 @@ A fast, cross-platform CLI tool and desktop GUI application for uploading files 
 - 👥 **Multi-Account Support**: Configure and switch between multiple Nextcloud accounts or self-hosted instances seamlessly across CLI and GUI.
 - 🖥️ **Modern Desktop GUI**: Drag-and-drop queue management, per-file & total progress bars, retry handling, and browser-based Login Flow v2.
 - 🤖 **Automation Ready**: Output formatting options (`--json`, `--tsv`, `--url-only`, `--direct-url-only`) and headless SSH / CI authentication.
+- 🐚 **Shell Completions**: First-class completion scripts for `bash`, `zsh`, `fish`, `powershell`, and `elvish`.
 
 ---
 
 ## Documentation
 
+- 📖 **[CLI Reference](docs/cli-reference.md)**: Full syntax, subcommands (`login`, `upload`, `accounts`, `completions`), and options reference.
+- 💡 **[Automation & Scripting Recipes](docs/automation-recipes.md)**: Real-world examples for pipelines (`stdin`, `pv`, `mysqldump`, `curl`), `jq` parsing, and CI/CD workflows.
 - 📦 **[Installation Guide](docs/installation.md)**: Pre-built binaries, packages (`.dmg`, `.deb`, `.rpm`, `.msi`, `.AppImage`), and source compilation instructions.
 - 🖥️ **[GUI User Guide](docs/gui-guide.md)**: Walkthrough of the desktop app, drag-and-drop queue, retry mechanics, and account management.
 - 👥 **[Multi-Account Guide](docs/multi-account.md)**: Managing multiple servers, switching active defaults, and CLI/GUI token sharing.
@@ -36,10 +39,13 @@ A fast, cross-platform CLI tool and desktop GUI application for uploading files 
 # Interactive Login Flow v2 (opens browser):
 nut login https://cloud.example.com --label "Work"
 
+# Headless SSH authorization (prints URL in terminal):
+nut login https://cloud.example.com --no-browser --label "Server"
+
 # Or connect interactively via terminal prompt:
 nut login https://cloud.example.com --manual
 
-# Or non-interactive / automated script:
+# Or non-interactive / CI automated script:
 nut login https://cloud.example.com -u alice -p "app-password"
 ```
 
@@ -59,6 +65,12 @@ tar -czf - data/ | nut upload -s --stdin --filename "backup.tar.gz"
 
 # Output only the share link (ideal for scripts and clipboard pipes):
 nut upload -s --url-only report.pdf | pbcopy
+```
+
+#### Shell Completions:
+```bash
+# Generate shell completions (e.g. Zsh)
+nut completions zsh > ~/.zfunc/_nut
 ```
 
 #### Manage multiple accounts:
