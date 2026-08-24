@@ -2,6 +2,7 @@
 /target/
 **/target/
 **/*.rs.bk
+dist-packages/
 
 # Cargo local configs
 .cargo/config.toml.local

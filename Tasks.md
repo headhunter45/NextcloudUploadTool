@@ -70,7 +70,6 @@ This document defines the complete project roadmap and task tracking system for 
 
 | ID | Title | Status | Type |
 |---|---|---|---|
-| [NUT-018](#nut-018) | Implement Packaging for macOS, Windows, Linux | Triage | Chore |
 | [NUT-019](#nut-019) | Implement Homebrew/Winget/Chocolatey Manifests | Triage | Chore |
 | [NUT-020](#nut-020) | Write Documentation + Examples | Triage | Chore |
 | [NUT-022](#nut-022) | Implement CLI Shell Completions Generation | Triage | Feature |
@@ -93,6 +92,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-015](#nut-015) | Implement GUI Upload Progress Bars | Fixed | Feature |
 | [NUT-016](#nut-016) | Implement Shared Auth Token Reuse | Fixed | Integration |
 | [NUT-017](#nut-017) | Implement Multi-Account Switching (GUI + CLI) | Fixed | Integration |
+| [NUT-018](#nut-018) | Implement Packaging for macOS, Windows, Linux | Fixed | Chore |
 | [NUT-021](#nut-021) | Support Headless & SSH Remote Authentication Modes | Fixed | Feature |
 
 ---
@@ -442,20 +442,20 @@ Add multi-account switching to both CLI and GUI.
 - NUT-014
 
 
-<a id="nut-018" class="task" data-status="triage" data-task-type="chore"></a>
+<a id="nut-018" class="task" data-status="done" data-task-type="chore"></a>
 ### Implement Packaging for macOS, Windows, Linux  
 **ID:** NUT-018  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Chore  
 
 **Description:**  
-Package the CLI and GUI for distribution.
+Package the CLI and GUI for distribution across macOS, Windows, and Linux.
 
 **Requirements:**  
-- [ ] macOS `.app` + `.dmg`  
-- [ ] Windows `.exe` + installer  
-- [ ] Linux `.deb` + `.rpm`  
-- [ ] Static CLI binaries  
+- [x] macOS `.app` + `.dmg`  
+- [x] Windows `.exe` + installer  
+- [x] Linux `.deb` + `.rpm`  
+- [x] Static CLI binaries  
 
 **Dependencies:**  
 - NUT-008  

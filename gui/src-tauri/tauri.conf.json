@@ -31,6 +31,38 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "category": "Utility",
+    "shortDescription": "Fast, seamless Nextcloud file uploader and share link generator",
+    "longDescription": "Upload files to Nextcloud with ease, automatically generate share links, and manage multiple accounts with secure OS keychain storage.",
+    "linux": {
+      "deb": {
+        "depends": [
+          "libwebkit2gtk-4.1-0 | libwebkit2gtk-4.0-37",
+          "libayatana-appindicator3-1 | libappindicator3-1",
+          "librsvg2-common"
+        ]
+      },
+      "rpm": {
+        "depends": [
+          "webkit2gtk4.1",
+          "libappindicator-gtk3"
+        ]
+      }
+    },
+    "macOS": {
+      "minimumSystemVersion": "10.15",
+      "dmg": {
+        "windowSize": {
+          "width": 600,
+          "height": 400
+        }
+      }
+    },
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
   }
 }
