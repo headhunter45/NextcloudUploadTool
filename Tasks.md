@@ -70,7 +70,6 @@ This document defines the complete project roadmap and task tracking system for 
 
 | ID | Title | Status | Type |
 |---|---|---|---|
-| [NUT-012](#nut-012) | Implement GUI (Tauri) Frontend | Triage | Feature |
 | [NUT-013](#nut-013) | Implement GUI File Queue + Drag-and-Drop | Triage | Feature |
 | [NUT-014](#nut-014) | Implement GUI Credential Management UI | Triage | Feature |
 | [NUT-015](#nut-015) | Implement GUI Upload Progress Bars | Triage | Feature |
@@ -93,6 +92,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-009](#nut-009) | Implement CLI Output Formatting Options | Fixed | Feature |
 | [NUT-010](#nut-010) | Implement CLI Multi-file Upload Support | Fixed | Feature |
 | [NUT-011](#nut-011) | Implement CLI Progress Reporting + pv Support | Fixed | Feature |
+| [NUT-012](#nut-012) | Implement GUI (Tauri) Frontend | Fixed | Feature |
 | [NUT-021](#nut-021) | Support Headless & SSH Remote Authentication Modes | Fixed | Feature |
 
 ---
@@ -320,20 +320,20 @@ Integrate rich progress reporting with `indicatif` (speed, ETA, byte counters), 
 - NUT-008
 
 
-<a id="nut-012" class="task" data-status="triage" data-task-type="feature"></a>
+<a id="nut-012" class="task" data-status="done" data-task-type="feature"></a>
 ### Implement GUI (Tauri) Frontend  
 **ID:** NUT-012  
-**Status:** Triage  
+**Status:** Fixed  
 **Type:** Feature  
 
 **Description:**  
 Implement the Tauri-based GUI application with a clean, responsive layout connecting the React frontend to the shared Rust backend.
 
 **Requirements:**  
-- [ ] Connect shared Rust backend library to Tauri commands in `gui/src-tauri`  
-- [ ] Implement responsive application layout with navigation & account indicator  
-- [ ] Implement file upload UI with destination path, public share link generation, and password protection  
-- [ ] Implement real-time feedback with share links, direct download URLs, and copy actions  
+- [x] Connect shared Rust backend library to Tauri commands in `gui/src-tauri`  
+- [x] Implement responsive application layout with navigation & account indicator  
+- [x] Implement file upload UI with destination path, public share link generation, and password protection  
+- [x] Implement real-time feedback with share links, direct download URLs, and copy actions  
 
 **Dependencies:**  
 - NUT-002  

@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "gui",
+  "productName": "Nextcloud Upload Tool",
   "version": "0.1.0",
   "identifier": "me.majinnaibu.nut",
   "build": {
@@ -12,9 +12,10 @@
   "app": {
     "windows": [
       {
-        "title": "gui",
-        "width": 800,
-        "height": 600
+        "label": "main",
+        "title": "Nextcloud Upload Tool",
+        "width": 900,
+        "height": 680
       }
     ],
     "security": {
