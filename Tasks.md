@@ -60,7 +60,8 @@ This document defines the complete project roadmap and task tracking system for 
 > - **Anchor Tags as SSOT**: The HTML anchor tag `<a id="..." class="task" data-status="..." data-task-type="..."></a>` above each task heading is the single source of truth (SSOT) for ID, status, and task type.
 > - **Task Details as SSOT**: The detailed task body is the SSOT for title, description, requirements checklist, and direct dependencies.
 > - **Rendered Sections**: The [Tasks Summary](#tasks-summary) table and the bottom enum tables ([Task Statuses](#task-statuses) & [Task Types](#task-types)) are rendered views that must be synchronized whenever SSOT data changes.
-> - **Full Documentation**: Review the complete rules, schemas, and contributor workflows in [Task System Documentation & Rules](#task-system-rules) before editing or restructuring tasks.
+> - **Single Task Scope**: Implement only one task at a time, test and verify, update [Tasks.md](#tasks-summary), and pause for user commit.
+> - **Full Documentation**: Review the complete rules, schemas, and contributor workflows in [Task System Documentation & Rules](#task-system-rules) and [AGENTS.md](file:///Users/tom/Projects/Apps/NextcloudUploadTool/AGENTS.md) before editing or restructuring tasks.
 
 ---
 
@@ -326,12 +327,13 @@ Integrate rich progress reporting with `indicatif` (speed, ETA, byte counters), 
 **Type:** Feature  
 
 **Description:**  
-Implement the Tauri-based GUI application.
+Implement the Tauri-based GUI application with a clean, responsive layout connecting the React frontend to the shared Rust backend.
 
 **Requirements:**  
-- [ ] Create window layout  
-- [ ] Connect Rust backend    
-- [ ] Implement basic upload UI  
+- [ ] Connect shared Rust backend library to Tauri commands in `gui/src-tauri`  
+- [ ] Implement responsive application layout with navigation & account indicator  
+- [ ] Implement file upload UI with destination path, public share link generation, and password protection  
+- [ ] Implement real-time feedback with share links, direct download URLs, and copy actions  
 
 **Dependencies:**  
 - NUT-002  
@@ -626,11 +628,19 @@ Tasks progress through defined statuses:
 - Checklists must use standard GitHub Markdown `- [ ]` and `- [x]`.
 - Spacing: Use two blank lines between detailed task blocks. Horizontal rules (`---`) are reserved for separating major top-level sections.
 
-### Maintenance Procedures
+### Table & Section Sorting Rules
 
-- **Adding a Task**: Append the next sequential ID, create the anchor tag and detailed section separated by two blank lines, and add the row to [Tasks Summary](#tasks-summary).
-- **Updating Status/Type**: Update the `data-status` and `data-task-type` attributes in the task anchor tag, the text fields in the task detail section, and the corresponding row in [Tasks Summary](#tasks-summary).
-- **Modifying Enums**: Any changes to available statuses or types must originate in the YAML frontmatter (`task-statuses` / `task-types`) and be re-rendered into the corresponding reference tables below.
+- **Tasks Summary Table**:
+  - Non-fixed/open tasks (`triage`, `pending`, `in_progress`, `blocked`) are positioned at the top.
+  - Fixed/done tasks are positioned at the bottom, sorted in **ascending numeric order** by task ID (`NUT-001`, `NUT-002`, `NUT-003`, ...).
+- **Detailed Tasks Section**:
+  - All detailed task sections remain in **strictly ascending numeric order** (`NUT-001`, `NUT-002`, `NUT-003`, ...).
+
+### Contributor & Agent Workflow
+
+1. **One Task at a Time**: Only one task is moved to `in_progress` and worked on per development turn.
+2. **Verification First**: All unit and workspace tests (`cargo test --workspace`) and frontend builds (`cd gui && npm run build`) must pass cleanly before marking a task Fixed.
+3. **Commit Handoff**: The agent updates [Tasks.md](#tasks-summary) upon task completion and pauses for the user to make the git commit. The agent does not execute commits or destructive git operations.
 
 ---
 
