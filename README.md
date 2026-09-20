@@ -30,6 +30,65 @@ A fast, cross-platform CLI tool and desktop GUI application for uploading files 
 
 ---
 
+## Build and Install
+
+### Prerequisites
+
+- Rust toolchain
+- Node.js 20+ and npm
+- macOS Xcode Command Line Tools: `xcode-select --install`
+
+### Build the CLI
+
+Build the optimized release binary:
+
+```bash
+cargo build --release -p nut
+```
+
+The binary is created at `target/release/nut`. To create a distributable archive, run:
+
+```bash
+./scripts/build-cli.sh
+```
+
+The archive is written to `dist-packages/`.
+
+To install the CLI locally on macOS or Linux:
+
+```bash
+mkdir -p ~/.local/bin
+install -m 755 target/release/nut ~/.local/bin/nut
+```
+
+Make sure `~/.local/bin` is included in your `PATH`.
+
+### Build the GUI
+
+Build the frontend and package the native desktop application:
+
+```bash
+cd gui
+npm install
+npm run tauri build
+```
+
+Alternatively, run the packaging helper from the repository root:
+
+```bash
+./scripts/build-gui.sh
+```
+
+Installers and application bundles are created in `gui/src-tauri/target/release/bundle/`. On macOS, open the generated `.dmg` and drag **Nextcloud Upload Tool.app** into `/Applications`:
+
+```bash
+open gui/src-tauri/target/release/bundle/dmg/*.dmg
+```
+
+See the [Installation Guide](docs/installation.md) for platform-specific prerequisites, installers, and source-build details.
+
+---
+
 ## Quick Start
 
 ### 1. CLI Usage
