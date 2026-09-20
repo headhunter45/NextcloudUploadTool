@@ -1,0 +1,25 @@
+{
+  "nextcloud-upload-tool": {
+    "id": "nextcloud-upload-tool",
+    "title": "Nextcloud Upload Tool",
+    "description": "Cross-platform CLI and desktop GUI for uploading files to Nextcloud and generating direct-download or public share links.",
+    "docId": "Nextcloud-Upload-Tool",
+    "image": {
+      "url": "PROMPT: Clean product screenshot-style illustration of a cross-platform Nextcloud file upload tool, showing a modern desktop upload queue with progress bars, a terminal window with a share URL, subtle Nextcloud-inspired blue accents, crisp technical portfolio asset, no readable text, wide landscape composition",
+      "alt": "Nextcloud Upload Tool desktop GUI and CLI",
+      "prompt": "Clean product screenshot-style illustration of a cross-platform Nextcloud file upload tool, showing a modern desktop upload queue with progress bars, a terminal window with a share URL, subtle Nextcloud-inspired blue accents, crisp technical portfolio asset, no readable text, wide landscape composition",
+      "width": 1600,
+      "height": 900,
+      "backgroundClassName": "bg-surface"
+    },
+    "url": "/projects/nextcloud-upload-tool",
+    "tags": ["featured", "open-source"],
+    "source": {
+      "type": "github",
+      "url": "https://github.com/majinnaibu/nextcloud-upload-tool"
+    },
+    "feedback": {
+      "url": "https://github.com/majinnaibu/nextcloud-upload-tool/issues"
+    }
+  }
+}
