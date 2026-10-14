@@ -726,6 +726,9 @@ fn create_indicatif_progress_callback(total_bytes: Option<u64>) -> ProgressCallb
     };
 
     Arc::new(move |event| match event {
+        ProgressEvent::Started { .. } => {
+            pb.reset_elapsed();
+        }
         ProgressEvent::Progress { bytes_transferred, .. } => {
             pb.set_position(bytes_transferred);
         }
@@ -733,7 +736,6 @@ fn create_indicatif_progress_callback(total_bytes: Option<u64>) -> ProgressCallb
             pb.set_position(total_bytes);
             pb.finish_and_clear();
         }
-        _ => {}
     })
 }
 
