@@ -94,6 +94,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-021](#nut-021) | Support Headless & SSH Remote Authentication Modes | Fixed | Feature |
 | [NUT-022](#nut-022) | Implement CLI Shell Completions Generation | Fixed | Feature |
 | [NUT-023](#nut-023) | Write Comprehensive CLI Documentation and Automation Guides | Fixed | Chore |
+| [NUT-025](#nut-025) | Optimize CI Workflow with Fast-Forward Commit Reuse and Git Notes Metadata | Fixed | Chore |
 
 ---
 
@@ -586,6 +587,26 @@ Create a containerized integration test harness using Docker or Podman to spin u
 - NUT-010  
 - NUT-011  
 - NUT-021
+
+
+<a id="nut-025" class="task" data-status="done" data-task-type="chore"></a>
+### Optimize CI Workflow with Fast-Forward Commit Reuse and Git Notes Metadata  
+**ID:** NUT-025  
+**Status:** Fixed  
+**Type:** Chore  
+
+**Description:**  
+Enhance the GitHub Actions CI workflow (`.github/workflows/ci.yml`) to build on pushes and pull requests to `main`, `staging`, and `develop`, avoid redundant rebuilds of fast-forward commits that have already passed CI, record per-OS check completion via GitHub Commit Statuses and Git Notes (`refs/notes/ci`), and expose a unified merge-check gate job for branch protection.
+
+**Requirements:**  
+- [x] Configure concurrency control in `.github/workflows/ci.yml` to cancel superseded PR runs  
+- [x] Resolve the true commit SHA (`pull_request.head.sha` on PRs, `github.sha` on pushes) and verify fast-forward ancestry against the target base branch on PRs  
+- [x] Check existing GitHub Commit Statuses (`ci/<os>`) and Git Notes (`refs/notes/ci`) before running heavy build/test steps so already-verified checks skip cleanly on fast-forward merges and flaky reruns  
+- [x] Record passed per-OS checks to both GitHub Commit Statuses (`ci/<os>`) and `refs/notes/ci` (with retry-safe atomic push)  
+- [x] Add a final `ci-gate` job suitable for GitHub Branch Protection required merge checks on `main`, `staging`, and `develop`  
+
+**Dependencies:**  
+- NUT-001
 
 ---
 
