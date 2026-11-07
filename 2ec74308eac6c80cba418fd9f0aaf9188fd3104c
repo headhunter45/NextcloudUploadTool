@@ -1,1 +1,2 @@
 ci/macos-latest=passed timestamp=2026-11-07T00:28:00Z run_id=42318145153 event=pull_request
+ci/windows-latest=passed timestamp=2026-11-07T00:29:05Z run_id=42318145153 event=pull_request
