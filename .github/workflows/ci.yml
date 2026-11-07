@@ -57,7 +57,7 @@ jobs:
           fi
 
           # 1. Check Git Notes (refs/notes/ci) on TARGET_SHA
-          git fetch origin refs/notes/ci:refs/notes/ci 2>/dev/null || true
+          git fetch origin +refs/notes/ci:refs/notes/ci 2>/dev/null || true
           NOTE_CONTENT="$(git notes --ref=ci show "${TARGET_SHA}" 2>/dev/null || true)"
           NOTE_PASSED="false"
           if [ -n "${NOTE_CONTENT}" ] && grep -q "^${CHECK_KEY}=passed" <<< "${NOTE_CONTENT}"; then
@@ -94,7 +94,7 @@ jobs:
         if: runner.os == 'Linux' && steps.check_cache.outputs.skip_build != 'true'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf libssl-dev libdbus-1-dev pkg-config
 
       - name: Setup Node.js
         if: steps.check_cache.outputs.skip_build != 'true'
@@ -105,7 +105,7 @@ jobs:
       - name: Install GUI frontend dependencies
         if: steps.check_cache.outputs.skip_build != 'true'
         working-directory: gui
-        run: npm ci
+        run: npm install
 
       - name: Build GUI frontend
         if: steps.check_cache.outputs.skip_build != 'true'
@@ -138,7 +138,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           for attempt in 1 2 3 4 5; do
-            git fetch origin refs/notes/ci:refs/notes/ci 2>/dev/null || true
+            git fetch origin +refs/notes/ci:refs/notes/ci 2>/dev/null || true
             EXISTING_NOTE="$(git notes --ref=ci show "${TARGET_SHA}" 2>/dev/null || true)"
 
             if [ -n "${EXISTING_NOTE}" ] && grep -q "^${CHECK_KEY}=passed" <<< "${EXISTING_NOTE}"; then
