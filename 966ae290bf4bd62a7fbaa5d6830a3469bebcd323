@@ -1,1 +1,2 @@
 ci/macos-latest=passed timestamp=2026-11-07T01:01:15Z run_id=42321550387 event=pull_request
+ci/ubuntu-latest=passed timestamp=2026-11-07T01:01:30Z run_id=42321550387 event=pull_request
