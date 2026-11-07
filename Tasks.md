@@ -72,6 +72,7 @@ This document defines the complete project roadmap and task tracking system for 
 |---|---|---|---|
 | [NUT-019](#nut-019) | Implement Homebrew/Winget/Chocolatey Manifests | Triage | Chore |
 | [NUT-024](#nut-024) | Create Docker/Podman Nextcloud Integration Test Harness | Triage | Foundation |
+| [NUT-026](#nut-026) | Build React Documentation & Marketing Website on GitHub Pages | Triage | Feature |
 | [NUT-001](#nut-001) | Establish Repository Structure | Fixed | Foundation |
 | [NUT-002](#nut-002) | Implement Shared Rust Backend Library | Fixed | Foundation |
 | [NUT-003](#nut-003) | Implement WebDAV Upload Logic | Fixed | Feature |
@@ -607,6 +608,27 @@ Enhance the GitHub Actions CI workflow (`.github/workflows/ci.yml`) to build on 
 
 **Dependencies:**  
 - NUT-001
+
+
+<a id="nut-026" class="task" data-status="triage" data-task-type="feature"></a>
+### Build React Documentation & Marketing Website on GitHub Pages  
+**ID:** NUT-026  
+**Status:** Triage  
+**Type:** Feature  
+
+**Description:**  
+Create a React-based project website hosted via GitHub Pages at `https://headhunter45.github.io/NextcloudUploadTool` featuring project marketing/presentation content, interactive examples, and comprehensive CLI/GUI documentation, and integrate automatic website deployment into the release workflow.
+
+**Requirements:**  
+- [ ] Scaffold React static site configured for GitHub Pages base path (`/NextcloudUploadTool/`) and URL (`https://headhunter45.github.io/NextcloudUploadTool`)  
+- [ ] Create landing/marketing presentation page highlighting key CLI and GUI features, screenshots/walkthroughs, and download links  
+- [ ] Integrate project documentation (`docs/cli-reference.md`, `docs/automation-recipes.md`, `docs/installation.md`, `docs/gui-guide.md`, `docs/multi-account.md`, `docs/architecture.md`) and usage examples  
+- [ ] Update `.github/workflows/release.yml` to build and publish the website to GitHub Pages when a release is published  
+
+**Dependencies:**  
+- NUT-018  
+- NUT-020  
+- NUT-023
 
 ---
 
