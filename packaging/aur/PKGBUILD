@@ -1,0 +1,31 @@
+# Maintainer: Tom Hicks <headhunter3@gmail.com>
+pkgname=nextcloud-upload-tool-bin
+_pkgname=nut
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Fast CLI tool for uploading files to Nextcloud and generating instant share links"
+arch=('x86_64' 'aarch64')
+url="https://github.com/headhunter45/NextcloudUploadTool"
+license=('MIT')
+provides=('nut' 'nextcloud-upload-tool')
+conflicts=('nextcloud-upload-tool')
+source_x86_64=("${pkgname}-${pkgver}-x86_64.tar.gz::${url}/releases/download/v${pkgver}/nut-x86_64-unknown-linux-musl.tar.gz")
+source_aarch64=("${pkgname}-${pkgver}-aarch64.tar.gz::${url}/releases/download/v${pkgver}/nut-aarch64-unknown-linux-musl.tar.gz")
+sha256sums_x86_64=('0000000000000000000000000000000000000000000000000000000000000000')
+sha256sums_aarch64=('0000000000000000000000000000000000000000000000000000000000000000')
+
+package() {
+  install -Dm755 "${srcdir}/nut" "${pkgdir}/usr/bin/nut"
+  install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  install -Dm644 "${srcdir}/README.md" "${pkgdir}/usr/share/doc/${pkgname}/README.md"
+
+  # Generate and install shell completions
+  install -d "${pkgdir}/usr/share/bash-completion/completions"
+  install -d "${pkgdir}/usr/share/zsh/site-functions"
+  install -d "${pkgdir}/usr/share/fish/vendor_completions.d"
+
+  "${pkgdir}/usr/bin/nut" completions bash > "${pkgdir}/usr/share/bash-completion/completions/nut"
+  "${pkgdir}/usr/bin/nut" completions zsh > "${pkgdir}/usr/share/zsh/site-functions/_nut"
+  "${pkgdir}/usr/bin/nut" completions fish > "${pkgdir}/usr/share/fish/vendor_completions.d/nut.fish"
+}
+

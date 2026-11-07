@@ -1,0 +1,18 @@
+pkgbase = nextcloud-upload-tool-bin
+	pkgdesc = Fast CLI tool for uploading files to Nextcloud and generating instant share links
+	pkgver = 0.1.0
+	pkgrel = 1
+	url = https://github.com/headhunter45/NextcloudUploadTool
+	arch = x86_64
+	arch = aarch64
+	license = MIT
+	provides = nut
+	provides = nextcloud-upload-tool
+	conflicts = nextcloud-upload-tool
+	source_x86_64 = nextcloud-upload-tool-bin-0.1.0-x86_64.tar.gz::https://github.com/headhunter45/NextcloudUploadTool/releases/download/v0.1.0/nut-x86_64-unknown-linux-musl.tar.gz
+	sha256sums_x86_64 = 0000000000000000000000000000000000000000000000000000000000000000
+	source_aarch64 = nextcloud-upload-tool-bin-0.1.0-aarch64.tar.gz::https://github.com/headhunter45/NextcloudUploadTool/releases/download/v0.1.0/nut-aarch64-unknown-linux-musl.tar.gz
+	sha256sums_aarch64 = 0000000000000000000000000000000000000000000000000000000000000000
+
+pkgname = nextcloud-upload-tool-bin
+

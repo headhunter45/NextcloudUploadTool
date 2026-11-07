@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: headhunter45.NextcloudUploadTool
+PackageVersion: 0.1.0
+PackageLocale: en-US
+Publisher: Tom Hicks
+PublisherUrl: https://github.com/headhunter45
+PublisherSupportUrl: https://github.com/headhunter45/NextcloudUploadTool/issues
+Author: Tom Hicks
+PackageName: Nextcloud Upload Tool
+PackageUrl: https://github.com/headhunter45/NextcloudUploadTool
+License: MIT
+LicenseUrl: https://github.com/headhunter45/NextcloudUploadTool/blob/main/LICENSE
+ShortDescription: Fast CLI tool and desktop GUI application for uploading files to Nextcloud and generating instant share links.
+Description: >-
+  Nextcloud Upload Tool (nut) provides a fast command-line tool and native Tauri desktop GUI
+  for streaming file uploads to Nextcloud via WebDAV, generating public OCS share and direct-download links,
+  and managing multiple Nextcloud accounts using OS keychain storage and Login Flow v2.
+Moniker: nut
+Tags:
+  - nextcloud
+  - webdav
+  - upload
+  - cli
+  - file-sharing
+  - cloud-storage
+ReleaseNotesUrl: https://github.com/headhunter45/NextcloudUploadTool/releases/tag/v0.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
+

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>nextcloud-upload-tool</id>
+    <version>0.1.0</version>
+    <packageSourceUrl>https://github.com/headhunter45/NextcloudUploadTool/tree/main/packaging/chocolatey</packageSourceUrl>
+    <owners>headhunter45</owners>
+    <title>Nextcloud Upload Tool (nut)</title>
+    <authors>Tom Hicks</authors>
+    <projectUrl>https://github.com/headhunter45/NextcloudUploadTool</projectUrl>
+    <licenseUrl>https://github.com/headhunter45/NextcloudUploadTool/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/headhunter45/NextcloudUploadTool</projectSourceUrl>
+    <docsUrl>https://github.com/headhunter45/NextcloudUploadTool/tree/main/docs</docsUrl>
+    <bugTrackerUrl>https://github.com/headhunter45/NextcloudUploadTool/issues</bugTrackerUrl>
+    <tags>nextcloud webdav upload cli gui file-sharing rust</tags>
+    <summary>Fast CLI tool and desktop GUI application for uploading files to Nextcloud and generating instant share links.</summary>
+    <description><![CDATA[
+Nextcloud Upload Tool (`nut`) is a fast, cross-platform CLI and desktop GUI application for uploading files and streams to Nextcloud via WebDAV and generating instant public share and direct-download links via the OCS Sharing API.
+
+### Features
+- **Streaming WebDAV Uploads**: Upload files, directories, and `stdin` pipelines with real-time progress bars.
+- **Instant Share & Direct Links**: Generate public share links and direct-download URLs (`--url-only`, `--direct-url-only`).
+- **Secure Credential Storage**: Uses Windows Credential Manager with Login Flow v2 browser authorization.
+- **Multi-Account Support**: Switch seamlessly between multiple Nextcloud servers and accounts.
+]]></description>
+    <releaseNotes>https://github.com/headhunter45/NextcloudUploadTool/releases/tag/v0.1.0</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

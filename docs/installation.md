@@ -4,7 +4,37 @@
 
 ---
 
-## 1. Pre-built Binaries & Installers
+## 1. Package Managers
+
+### macOS & Linux (Homebrew)
+```bash
+# Install CLI (`nut`) + shell completions:
+brew install headhunter45/tap/nut
+
+# Install macOS Desktop GUI (`Nextcloud Upload Tool.app`):
+brew install --cask headhunter45/tap/nextcloud-upload-tool
+```
+
+### Windows (Winget & Chocolatey)
+```powershell
+# Windows Package Manager (Winget):
+winget install headhunter45.NextcloudUploadTool
+
+# Chocolatey:
+choco install nextcloud-upload-tool
+```
+
+### Arch Linux (AUR)
+```bash
+# Using an AUR helper (paru / yay):
+yay -S nextcloud-upload-tool-bin
+```
+
+*(Manifest definitions are maintained in [`packaging/`](../packaging/README.md).)*
+
+---
+
+## 2. Pre-built Binaries & Installers
 
 Download pre-built releases for your operating system from the [Releases](https://github.com/majinnaibu/nextcloud-upload-tool/releases) page.
 
@@ -48,7 +78,7 @@ Download pre-built releases for your operating system from the [Releases](https:
 
 ---
 
-## 2. Building from Source
+## 3. Building from Source
 
 ### Prerequisites
 - **Rust toolchain** (1.75+): Install via `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`

@@ -72,7 +72,6 @@ This document defines the complete project roadmap and task tracking system for 
 
 | ID                  | Title                                                                      | Status | Type        |
 | ------------------- | -------------------------------------------------------------------------- | ------ | ----------- |
-| [NUT-019](#nut-019) | Implement Homebrew/Winget/Chocolatey Manifests                             | Triage | Chore       |
 | [NUT-024](#nut-024) | Create Docker/Podman Nextcloud Integration Test Harness                    | Triage | Foundation  |
 | [NUT-026](#nut-026) | Build React Documentation & Marketing Website on GitHub Pages              | Triage | Feature     |
 | [NUT-027](#nut-027) | Configure GitHub Pages Deployment Workflow on develop Branch Updates       | Triage | Chore       |
@@ -94,6 +93,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-016](#nut-016) | Implement Shared Auth Token Reuse                                          | Done   | Integration |
 | [NUT-017](#nut-017) | Implement Multi-Account Switching (GUI + CLI)                              | Done   | Integration |
 | [NUT-018](#nut-018) | Implement Packaging for macOS, Windows, Linux                              | Done   | Chore       |
+| [NUT-019](#nut-019) | Implement Homebrew/Winget/Chocolatey Manifests                             | Done   | Chore       |
 | [NUT-020](#nut-020) | Write Documentation + Examples                                             | Done   | Chore       |
 | [NUT-021](#nut-021) | Support Headless & SSH Remote Authentication Modes                         | Done   | Feature     |
 | [NUT-022](#nut-022) | Implement CLI Shell Completions Generation                                 | Done   | Feature     |
@@ -521,12 +521,12 @@ Package the CLI and GUI for distribution across macOS, Windows, and Linux.
 - NUT-008
 - NUT-012
 
-<a id="nut-019" class="task" data-status="triage" data-task-type="chore"></a>
+<a id="nut-019" class="task" data-status="done" data-task-type="chore"></a>
 
 ### Implement Homebrew/Winget/Chocolatey Manifests
 
 **ID:** NUT-019  
-**Status:** Triage  
+**Status:** Done  
 **Type:** Chore
 
 **Description:**  
@@ -534,10 +534,10 @@ Add package manager manifests for easy installation.
 
 **Requirements:**
 
-- [ ] Homebrew formula
-- [ ] Winget manifest
-- [ ] Chocolatey package
-- [ ] AUR PKGBUILD
+- [x] Homebrew formula
+- [x] Winget manifest
+- [x] Chocolatey package
+- [x] AUR PKGBUILD
 
 **Dependencies:**
 
@@ -697,14 +697,16 @@ Enhance the GitHub Actions CI workflow (`.github/workflows/ci.yml`) to build on 
 **Type:** Feature
 
 **Description:**  
-Create a React-based project website hosted via GitHub Pages at `https://headhunter45.github.io/NextcloudUploadTool` featuring project marketing/presentation content, interactive examples, and comprehensive CLI/GUI documentation, and integrate automatic website deployment into the release workflow.
+Create a `web/` project in the source tree for the project website hosted via GitHub Pages at `https://headhunter45.github.io/NextcloudUploadTool`. Standardize both `gui/` and `web/` on the same pinned Node.js version in root `.nvmrc`, Yarn Berry (via Corepack), React 19, TypeScript, Vite, and Tailwind CSS, and build a pure static SPA (no Jekyll) featuring marketing/presentation content, interactive examples, and comprehensive CLI/GUI documentation.
 
 **Requirements:**
 
-- [ ] Scaffold React static site configured for GitHub Pages base path (`/NextcloudUploadTool/`) and URL (`https://headhunter45.github.io/NextcloudUploadTool`)
-- [ ] Create landing/marketing presentation page highlighting key CLI and GUI features, screenshots/walkthroughs, and download links
-- [ ] Integrate project documentation (`docs/cli-reference.md`, `docs/automation-recipes.md`, `docs/installation.md`, `docs/gui-guide.md`, `docs/multi-account.md`, `docs/architecture.md`) and usage examples
-- [ ] Update `.github/workflows/release.yml` to build and publish the website to GitHub Pages when a release is published
+- [ ] Pin Node.js version in root `.nvmrc` and migrate `gui/` and `web/` to Yarn Berry (`nodeLinker: node-modules`) with shared React 19, Vite, TypeScript, and Tailwind CSS tooling
+- [ ] Scaffold `web/` React + Tailwind CSS project configured for GitHub Pages base path (`/NextcloudUploadTool/`) and URL (`https://headhunter45.github.io/NextcloudUploadTool`)
+- [ ] Capture screenshots and animated GIFs of the GUI application workflows (upload queue, drag-and-drop, progress bars, account management) and embed them in the website and documentation
+- [ ] Create landing/marketing presentation page highlighting key CLI and GUI features, screenshots/GIF walkthroughs, and latest release download links and version metadata
+- [ ] Integrate project documentation (`docs/cli-reference.md`, `docs/automation-recipes.md`, `docs/installation.md`, `docs/gui-guide.md`, `docs/multi-account.md`, `docs/architecture.md`) and usage examples into the React site
+- [ ] Update CI/release scripts and workflows to use Yarn Berry for `gui/` and `web/` builds
 
 **Dependencies:**
 
@@ -721,14 +723,15 @@ Create a React-based project website hosted via GitHub Pages at `https://headhun
 **Type:** Chore
 
 **Description:**  
-Create a GitHub Actions GitHub Pages deployment workflow (modeled after `OpenTasks`'s `.github/workflows/deploy.yml`, adapted from `main` to `develop`) that automatically builds and deploys the project website and documentation to `https://headhunter45.github.io/NextcloudUploadTool` whenever `develop` is updated, on release tag pushes (`v*` excluding `*-dev*`), or via manual `workflow_dispatch`.
+Create a GitHub Actions GitHub Pages deployment workflow (modeled after `OpenTasks`'s `.github/workflows/deploy.yml`, adapted from `main` to `develop`) that builds the `web/` React + Tailwind application with Yarn Berry and deploys the compiled `web/dist` static bundle directly to `https://headhunter45.github.io/NextcloudUploadTool` (using GitHub Actions Pages deployment, without Jekyll) whenever `develop` is updated, on release tag pushes (`v*` excluding `*-dev*`), or via manual `workflow_dispatch`, ensuring the published site always references the latest release downloads and versions.
 
 **Requirements:**
 
 - [ ] Trigger GitHub Pages build and deployment on pushes to `develop`, release tags (`v*`, `!*-dev*`), and `workflow_dispatch` (with optional `version` input)
 - [ ] Configure GitHub Pages workflow permissions (`contents: write`, `pages: write`, `id-token: write`) and concurrency control (`group: 'pages'`, `cancel-in-progress: false`)
-- [ ] Resolve the active project version from workflow input, release tag, or greatest ancestor `v*` git tag and inject version/checksum metadata into the staged `_site/` artifact (including `.nojekyll` and `docs/`)
-- [ ] Upload the site artifact with `actions/upload-pages-artifact@v3` and deploy to the `github-pages` environment via `actions/deploy-pages@v4`
+- [ ] Setup Node.js from root `.nvmrc` with Corepack / Yarn Berry enabled and resolve the latest published release version and download URLs (from GitHub Releases API / release tag / ancestor `v*` git tag)
+- [ ] Build `web/` (`yarn build`) with the latest release version and asset download links injected into the React build and upload `web/dist` via `actions/upload-pages-artifact@v3`
+- [ ] Deploy the uploaded artifact to the `github-pages` environment via `actions/deploy-pages@v4`
 
 **Dependencies:**
 
