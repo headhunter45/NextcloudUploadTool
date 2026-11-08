@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+      - '!*-dev*'
   workflow_dispatch:
 
 permissions:
@@ -43,6 +44,24 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version from git tag
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF:-}" == refs/tags/v* ]]; then
+            GIT_TAG="${GITHUB_REF_NAME}"
+          else
+            GIT_TAG="$(git -c versionsort.suffix=-dev tag --merged HEAD --list 'v*' --sort=-v:refname | head -n 1 || true)"
+          fi
+          if [ -n "${GIT_TAG}" ]; then
+            VERSION="${GIT_TAG#v}"
+          else
+            VERSION="0.1.0"
+          fi
+          echo "Resolved NUT_VERSION=${VERSION}"
+          echo "NUT_VERSION=${VERSION}" >> "${GITHUB_ENV}"
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -54,10 +73,14 @@ jobs:
 
       - name: Install cross
         if: matrix.use_cross
-        run: cargo install cross --git https://github.com/cross-rs/cross
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cross
 
       - name: Build static CLI binary (with cross)
         if: matrix.use_cross
+        env:
+          CROSS_CONTAINER_OPTS: --env NUT_VERSION=${{ env.NUT_VERSION }}
         run: cross build --release --target ${{ matrix.target }} -p nut
 
       - name: Build CLI binary (standard)
@@ -104,11 +127,42 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Sync GUI version from git tag
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF:-}" == refs/tags/v* ]]; then
+            GIT_TAG="${GITHUB_REF_NAME}"
+          else
+            GIT_TAG="$(git -c versionsort.suffix=-dev tag --merged HEAD --list 'v*' --sort=-v:refname | head -n 1 || true)"
+          fi
+          if [ -n "${GIT_TAG}" ]; then
+            RAW_VERSION="${GIT_TAG#v}"
+          else
+            RAW_VERSION="0.1.0"
+          fi
+          BUNDLE_VERSION="${RAW_VERSION%-dev}"
+          echo "NUT_VERSION=${RAW_VERSION}" >> "${GITHUB_ENV}"
+          echo "Syncing GUI version to ${BUNDLE_VERSION} (NUT_VERSION=${RAW_VERSION})"
+          node -e '
+            const fs = require("fs");
+            const ver = process.argv[1];
+            for (const file of ["gui/package.json", "gui/src-tauri/tauri.conf.json"]) {
+              const data = JSON.parse(fs.readFileSync(file, "utf8"));
+              data.version = ver;
+              fs.writeFileSync(file, JSON.stringify(data, null, 2) + "\n");
+            }
+            const cargoPath = "gui/src-tauri/Cargo.toml";
+            const cargo = fs.readFileSync(cargoPath, "utf8").replace(/^version = ".*"$/m, `version = "${ver}"`);
+            fs.writeFileSync(cargoPath, cargo);
+          ' "${BUNDLE_VERSION}"
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -120,11 +174,25 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev rpm
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf libssl-dev libdbus-1-dev pkg-config rpm
 
       - name: Install frontend dependencies
         working-directory: gui
-        run: npm ci
+        run: npm install
+
+      - name: Read CHANGELOG.md
+        id: changelog
+        shell: bash
+        run: |
+          if [ -f CHANGELOG.md ] && [ -s CHANGELOG.md ]; then
+            {
+              echo "body<<CHANGELOG_EOF"
+              cat CHANGELOG.md
+              echo "CHANGELOG_EOF"
+            } >> "${GITHUB_OUTPUT}"
+          else
+            echo "body=See release notes for changes." >> "${GITHUB_OUTPUT}"
+          fi
 
       - name: Build Tauri GUI
         uses: tauri-apps/tauri-action@v0
@@ -134,7 +202,7 @@ jobs:
           projectPath: "./gui"
           tagName: ${{ github.ref_name }}
           releaseName: "Nextcloud Upload Tool ${{ github.ref_name }}"
-          releaseBody: "See release notes for changes."
+          releaseBody: ${{ steps.changelog.outputs.body }}
           releaseDraft: true
           prerelease: false
 
@@ -150,17 +218,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+          merge-multiple: true
 
       - name: Generate Checksums
         run: |
           cd artifacts
-          find . -type f -name "*.tar.gz" -o -name "*.zip" -exec sha256sum {} + > SHA256SUMS
+          find . -maxdepth 1 -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec sha256sum {} + > SHA256SUMS
           cat SHA256SUMS
 
       - name: Upload Checksums to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref_name, '-dev')
         uses: softprops/action-gh-release@v2
         with:
+          body_path: CHANGELOG.md
           files: |
             artifacts/**/*
             artifacts/SHA256SUMS

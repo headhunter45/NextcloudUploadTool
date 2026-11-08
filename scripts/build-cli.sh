@@ -13,7 +13,12 @@ cd "${ROOT_DIR}"
 cargo build --release -p nut
 
 TARGET_BIN="${ROOT_DIR}/target/release/nut"
-VERSION=$(cargo pkgid -p nut | cut -d# -f2 | cut -d: -f2 || echo "0.1.0")
+GIT_TAG=$(git -c versionsort.suffix=-dev tag --merged HEAD --list 'v*' --sort=-v:refname 2>/dev/null | head -n 1 || true)
+if [ -n "${GIT_TAG}" ]; then
+  VERSION="${GIT_TAG#v}"
+else
+  VERSION=$(cargo pkgid -p nut | cut -d# -f2 | cut -d: -f2 || echo "0.1.0")
+fi
 ARCH=$(uname -m)
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 

@@ -17,7 +17,7 @@ use nextcloud_client::{
 #[command(
     name = "nut",
     author = "Tom Hicks <headhunter3@gmail.com>",
-    version,
+    version = nextcloud_client::VERSION,
     about = "Nextcloud Upload Tool — Fast, seamless file uploads & share links",
     long_about = "Upload files to Nextcloud directly from your terminal, automatically generate public share links, and manage multiple accounts with secure OS keychain storage."
 )]

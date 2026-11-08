@@ -20,7 +20,7 @@ pub use auth::{
     LoginFlowPollInfo, LoginFlowPollSuccess,
 };
 pub use client::{NextcloudClient, ServerStatus};
-pub use config::{AccountCredentials, ClientConfig};
+pub use config::{AccountCredentials, ClientConfig, DEFAULT_USER_AGENT, VERSION};
 pub use credentials::{CredentialStore, StoredAccount, KEYRING_SERVICE_NAME};
 pub use download::{
     build_direct_download_url, build_subfile_download_url, validate_share_token,

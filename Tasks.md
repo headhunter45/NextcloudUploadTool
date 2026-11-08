@@ -72,6 +72,7 @@ This document defines the complete project roadmap and task tracking system for 
 |---|---|---|---|
 | [NUT-019](#nut-019) | Implement Homebrew/Winget/Chocolatey Manifests | Triage | Chore |
 | [NUT-024](#nut-024) | Create Docker/Podman Nextcloud Integration Test Harness | Triage | Foundation |
+| [NUT-026](#nut-026) | Build React Documentation & Marketing Website on GitHub Pages | Triage | Feature |
 | [NUT-001](#nut-001) | Establish Repository Structure | Fixed | Foundation |
 | [NUT-002](#nut-002) | Implement Shared Rust Backend Library | Fixed | Foundation |
 | [NUT-003](#nut-003) | Implement WebDAV Upload Logic | Fixed | Feature |
@@ -94,6 +95,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-021](#nut-021) | Support Headless & SSH Remote Authentication Modes | Fixed | Feature |
 | [NUT-022](#nut-022) | Implement CLI Shell Completions Generation | Fixed | Feature |
 | [NUT-023](#nut-023) | Write Comprehensive CLI Documentation and Automation Guides | Fixed | Chore |
+| [NUT-025](#nut-025) | Optimize CI Workflow with Fast-Forward Commit Reuse and Git Notes Metadata | Fixed | Chore |
 
 ---
 
@@ -586,6 +588,47 @@ Create a containerized integration test harness using Docker or Podman to spin u
 - NUT-010  
 - NUT-011  
 - NUT-021
+
+
+<a id="nut-025" class="task" data-status="done" data-task-type="chore"></a>
+### Optimize CI Workflow with Fast-Forward Commit Reuse and Git Notes Metadata  
+**ID:** NUT-025  
+**Status:** Fixed  
+**Type:** Chore  
+
+**Description:**  
+Enhance the GitHub Actions CI workflow (`.github/workflows/ci.yml`) to build on pushes and pull requests to `main`, `staging`, and `develop`, avoid redundant rebuilds of fast-forward commits that have already passed CI, record per-OS check completion via GitHub Commit Statuses and Git Notes (`refs/notes/ci`), and expose a unified merge-check gate job for branch protection.
+
+**Requirements:**  
+- [x] Configure concurrency control in `.github/workflows/ci.yml` to cancel superseded PR runs  
+- [x] Resolve the true commit SHA (`pull_request.head.sha` on PRs, `github.sha` on pushes) and verify fast-forward ancestry against the target base branch on PRs  
+- [x] Check existing GitHub Commit Statuses (`ci/<os>`) and Git Notes (`refs/notes/ci`) before running heavy build/test steps so already-verified checks skip cleanly on fast-forward merges and flaky reruns  
+- [x] Record passed per-OS checks to both GitHub Commit Statuses (`ci/<os>`) and `refs/notes/ci` (with retry-safe atomic push)  
+- [x] Add a final `ci-gate` job suitable for GitHub Branch Protection required merge checks on `main`, `staging`, and `develop`  
+
+**Dependencies:**  
+- NUT-001
+
+
+<a id="nut-026" class="task" data-status="triage" data-task-type="feature"></a>
+### Build React Documentation & Marketing Website on GitHub Pages  
+**ID:** NUT-026  
+**Status:** Triage  
+**Type:** Feature  
+
+**Description:**  
+Create a React-based project website hosted via GitHub Pages at `https://headhunter45.github.io/NextcloudUploadTool` featuring project marketing/presentation content, interactive examples, and comprehensive CLI/GUI documentation, and integrate automatic website deployment into the release workflow.
+
+**Requirements:**  
+- [ ] Scaffold React static site configured for GitHub Pages base path (`/NextcloudUploadTool/`) and URL (`https://headhunter45.github.io/NextcloudUploadTool`)  
+- [ ] Create landing/marketing presentation page highlighting key CLI and GUI features, screenshots/walkthroughs, and download links  
+- [ ] Integrate project documentation (`docs/cli-reference.md`, `docs/automation-recipes.md`, `docs/installation.md`, `docs/gui-guide.md`, `docs/multi-account.md`, `docs/architecture.md`) and usage examples  
+- [ ] Update `.github/workflows/release.yml` to build and publish the website to GitHub Pages when a release is published  
+
+**Dependencies:**  
+- NUT-018  
+- NUT-020  
+- NUT-023
 
 ---
 

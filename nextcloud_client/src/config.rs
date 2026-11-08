@@ -7,8 +7,12 @@ use crate::error::{NextcloudError, Result};
 /// Default request timeout for API calls (excluding long streaming uploads).
 pub const DEFAULT_TIMEOUT_SECS: u64 = 30;
 
+/// Application version resolved at compile time from the greatest ancestor `v*` git tag
+/// (falling back to `CARGO_PKG_VERSION`).
+pub const VERSION: &str = env!("NUT_VERSION");
+
 /// Default User-Agent header string.
-pub const DEFAULT_USER_AGENT: &str = "NextcloudUploadTool/0.1.0 (Rust)";
+pub const DEFAULT_USER_AGENT: &str = concat!("NextcloudUploadTool/", env!("NUT_VERSION"), " (Rust)");
 
 /// Credentials used to authenticate against a Nextcloud instance.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
