@@ -1,8 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
-import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import { invoke, listen, getCurrentWebviewWindow, openUrl } from "./tauriBridge";
 import "./App.css";
 
 interface StoredAccount {

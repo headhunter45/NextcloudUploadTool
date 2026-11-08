@@ -2,9 +2,18 @@ name: CI
 
 on:
   push:
-    branches: [ "main", "phase-*" ]
+    branches: ["main", "staging", "develop"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main", "staging", "develop"]
+
+permissions:
+  contents: write
+  statuses: write
+  checks: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test:
@@ -14,34 +23,205 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      CHECK_KEY: ci/${{ matrix.os }}
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Check commit CI status and fast-forward eligibility
+        id: check_cache
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Evaluating commit ${TARGET_SHA} for ${CHECK_KEY} (event: ${GITHUB_EVENT_NAME})"
+
+          IS_FF="true"
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            BASE_REF="${{ github.event.pull_request.base.ref }}"
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            git fetch origin "${BASE_REF}" 2>/dev/null || true
+
+            if git merge-base --is-ancestor "${BASE_SHA}" "${TARGET_SHA}"; then
+              echo "PR head ${TARGET_SHA} is a fast-forward of ${BASE_REF} (${BASE_SHA})."
+            else
+              IS_FF="false"
+              echo "::notice::PR head ${TARGET_SHA} is not currently a fast-forward of ${BASE_REF} (${BASE_SHA})."
+            fi
+          fi
+
+          # 1. Check Git Notes (refs/notes/ci) on TARGET_SHA
+          git fetch origin +refs/notes/ci:refs/notes/ci 2>/dev/null || true
+          NOTE_CONTENT="$(git notes --ref=ci show "${TARGET_SHA}" 2>/dev/null || true)"
+          NOTE_PASSED="false"
+          if [ -n "${NOTE_CONTENT}" ] && grep -q "^${CHECK_KEY}=passed" <<< "${NOTE_CONTENT}"; then
+            NOTE_PASSED="true"
+            echo "Found existing Git note in refs/notes/ci: ${CHECK_KEY}=passed on ${TARGET_SHA}"
+          fi
+
+          # 2. Check GitHub Commit Statuses on TARGET_SHA
+          STATUS_STATE="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${TARGET_SHA}/status" \
+            --jq ".statuses[] | select(.context == \"${CHECK_KEY}\") | .state" 2>/dev/null | head -n 1 || true)"
+          STATUS_PASSED="false"
+          if [ "${STATUS_STATE}" = "success" ]; then
+            STATUS_PASSED="true"
+            echo "Found existing GitHub commit status: ${CHECK_KEY}=success on ${TARGET_SHA}"
+          fi
+
+          if [ "${IS_FF}" = "true" ] && { [ "${NOTE_PASSED}" = "true" ] || [ "${STATUS_PASSED}" = "true" ]; }; then
+            echo "Check ${CHECK_KEY} already passed for fast-forward commit ${TARGET_SHA}; skipping build steps."
+            echo "skip_build=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "Check ${CHECK_KEY} has not yet been verified for ${TARGET_SHA}; running build and tests."
+            echo "skip_build=false" >> "${GITHUB_OUTPUT}"
+          fi
 
       - name: Install Rust stable
+        if: steps.check_cache.outputs.skip_build != 'true'
         uses: dtolnay/rust-toolchain@stable
 
       - name: Setup Rust cache
+        if: steps.check_cache.outputs.skip_build != 'true'
         uses: Swatinem/rust-cache@v2
 
       - name: Install Linux dependencies
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && steps.check_cache.outputs.skip_build != 'true'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf libssl-dev libdbus-1-dev pkg-config
 
-      - name: Setup Node.js
+      - name: Setup Node.js & Corepack (Yarn Berry)
+        if: steps.check_cache.outputs.skip_build != 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
 
-      - name: Install GUI frontend dependencies
-        working-directory: gui
-        run: npm ci
+      - name: Enable Corepack
+        if: steps.check_cache.outputs.skip_build != 'true'
+        run: corepack enable
 
-      - name: Build GUI frontend
+      - name: Install and build GUI frontend (Yarn Berry)
+        if: steps.check_cache.outputs.skip_build != 'true'
         working-directory: gui
-        run: npm run build
+        run: |
+          yarn install --immutable
+          yarn build
+
+      - name: Install and build Web documentation site (Yarn Berry)
+        if: steps.check_cache.outputs.skip_build != 'true'
+        working-directory: web
+        run: |
+          yarn install --immutable
+          yarn build
 
       - name: Run Workspace Tests
+        if: steps.check_cache.outputs.skip_build != 'true'
         run: cargo test --workspace --verbose
+
+      - name: Record passed check metadata (Commit Status & Git Notes)
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+          # 1. Record GitHub Commit Status on TARGET_SHA for branch protection & PR merge checks
+          gh api "repos/${GITHUB_REPOSITORY}/statuses/${TARGET_SHA}" \
+            -f state="success" \
+            -f context="${CHECK_KEY}" \
+            -f description="CI passed on ${{ matrix.os }}" \
+            -f target_url="${RUN_URL}" >/dev/null || {
+              echo "::warning::Could not post commit status for ${TARGET_SHA} (e.g. fork PR with read-only token)."
+            }
+
+          # 2. Record metadata in Git Notes (refs/notes/ci) on TARGET_SHA
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin +refs/notes/ci:refs/notes/ci 2>/dev/null || true
+            EXISTING_NOTE="$(git notes --ref=ci show "${TARGET_SHA}" 2>/dev/null || true)"
+
+            if [ -n "${EXISTING_NOTE}" ] && grep -q "^${CHECK_KEY}=passed" <<< "${EXISTING_NOTE}"; then
+              echo "Git note ${CHECK_KEY}=passed already recorded on ${TARGET_SHA}."
+              break
+            fi
+
+            NEW_LINE="${CHECK_KEY}=passed timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ) run_id=${GITHUB_RUN_ID} event=${GITHUB_EVENT_NAME}"
+            if [ -n "${EXISTING_NOTE}" ]; then
+              UPDATED_NOTE="$(printf '%s\n%s\n' "${EXISTING_NOTE}" "${NEW_LINE}")"
+            else
+              UPDATED_NOTE="${NEW_LINE}"
+            fi
+
+            git notes --ref=ci add -f -m "${UPDATED_NOTE}" "${TARGET_SHA}"
+
+            if [ "${ACT:-false}" = "true" ]; then
+              echo "Running locally under act; recorded ${CHECK_KEY}=passed in local refs/notes/ci for ${TARGET_SHA} (skipping remote push)."
+              break
+            fi
+
+            if git push origin refs/notes/ci:refs/notes/ci 2>/dev/null; then
+              echo "Recorded ${CHECK_KEY}=passed in refs/notes/ci for ${TARGET_SHA}."
+              break
+            fi
+
+            if [ "${attempt}" -eq 5 ]; then
+              echo "::warning::Could not push refs/notes/ci after ${attempt} attempts."
+              break
+            fi
+
+            echo "Contention pushing refs/notes/ci (attempt ${attempt}/5), retrying..."
+            sleep $((attempt * 2))
+          done
+
+      - name: Record failed check status
+        if: failure()
+        shell: bash
+        run: |
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          gh api "repos/${GITHUB_REPOSITORY}/statuses/${TARGET_SHA}" \
+            -f state="failure" \
+            -f context="${CHECK_KEY}" \
+            -f description="CI failed on ${{ matrix.os }}" \
+            -f target_url="${RUN_URL}" >/dev/null || true
+
+  ci-gate:
+    name: CI Merge Gate
+    needs: [test]
+    if: always()
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Verify all CI checks passed
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+          if [ "${{ needs.test.result }}" != "success" ]; then
+            gh api "repos/${GITHUB_REPOSITORY}/statuses/${TARGET_SHA}" \
+              -f state="failure" \
+              -f context="ci/gate" \
+              -f description="One or more CI platform checks failed or were cancelled" \
+              -f target_url="${RUN_URL}" >/dev/null || true
+            echo "::error::CI platform checks did not succeed (result: ${{ needs.test.result }})."
+            exit 1
+          fi
+
+          gh api "repos/${GITHUB_REPOSITORY}/statuses/${TARGET_SHA}" \
+            -f state="success" \
+            -f context="ci/gate" \
+            -f description="All CI platform checks verified" \
+            -f target_url="${RUN_URL}" >/dev/null || true
+          echo "All CI platform checks verified for ${TARGET_SHA}."

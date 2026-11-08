@@ -22,13 +22,17 @@ nextcloud-upload-tool/
 ├── cli/                      # CLI binary (`nut`)
 │   └── src/
 │       └── main.rs           # Clap CLI parser, upload handlers, terminal output
-├── gui/                      # Desktop application (Tauri v2 + React)
+├── gui/                      # Desktop application (Tauri v2 + React 19 + Tailwind CSS)
 │   ├── src/                  # React + TypeScript frontend
 │   │   ├── App.tsx           # UI tabs, drag-and-drop, state management
 │   │   └── App.css           # Styling and responsive layout
 │   └── src-tauri/            # Tauri Rust backend
 │       ├── src/commands.rs   # IPC command handlers forwarding to nextcloud_client
 │       └── tauri.conf.json   # Multi-platform bundle configuration
+├── web/                      # Project website & documentation SPA (React 19 + Tailwind CSS)
+│   └── src/
+│       ├── App.tsx           # Marketing landing page, CLI playground, & docs explorer
+│       └── releases.ts       # Dynamic GitHub release version & binary link resolver
 └── docs/                     # Documentation & user guides
 ```
 
@@ -82,11 +86,12 @@ cargo test -p nextcloud_client
 ```bash
 # In terminal 1: start Vite dev server
 cd gui
-npm install
-npm run dev
+corepack enable
+yarn install
+yarn dev
 
 # In terminal 2: run Tauri dev desktop app
 cargo run -p gui
 # Or use Tauri CLI
-npm run tauri dev
+yarn tauri dev
 ```

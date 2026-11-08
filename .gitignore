@@ -9,8 +9,16 @@ dist-packages/
 
 # Tauri & frontend artifacts
 node_modules/
+**/node_modules/
 **/dist/
 **/build/
+**/.yarn/*
+!**/.yarn/patches
+!**/.yarn/plugins
+!**/.yarn/releases
+!**/.yarn/sdks
+!**/.yarn/versions
+**/.pnp.*
 
 # JetBrains / RustRover / IntelliJ
 .idea/workspace.xml

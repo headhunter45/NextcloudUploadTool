@@ -72,7 +72,6 @@ This document defines the complete project roadmap and task tracking system for 
 
 | ID                  | Title                                                                      | Status      | Type        |
 | ------------------- | -------------------------------------------------------------------------- | ----------- | ----------- |
-| [NUT-026](#nut-026) | Build React Documentation & Marketing Website on GitHub Pages              | Triage      | Feature     |
 | [NUT-027](#nut-027) | Configure GitHub Pages Deployment Workflow on develop Branch Updates       | Triage      | Chore       |
 | [NUT-001](#nut-001) | Establish Repository Structure                                             | Done   | Foundation  |
 | [NUT-002](#nut-002) | Implement Shared Rust Backend Library                                      | Done   | Foundation  |
@@ -99,6 +98,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-023](#nut-023) | Write Comprehensive CLI Documentation and Automation Guides                | Done   | Chore       |
 | [NUT-024](#nut-024) | Create Docker/Podman Nextcloud Integration Test Harness                    | Done   | Foundation  |
 | [NUT-025](#nut-025) | Optimize CI Workflow with Fast-Forward Commit Reuse and Git Notes Metadata | Done   | Chore       |
+| [NUT-026](#nut-026) | Build React Documentation & Marketing Website on GitHub Pages              | Done   | Feature     |
 
 ---
 
@@ -688,12 +688,12 @@ Enhance the GitHub Actions CI workflow (`.github/workflows/ci.yml`) to build on 
 
 - NUT-001
 
-<a id="nut-026" class="task" data-status="triage" data-task-type="feature"></a>
+<a id="nut-026" class="task" data-status="done" data-task-type="feature"></a>
 
 ### Build React Documentation & Marketing Website on GitHub Pages
 
 **ID:** NUT-026  
-**Status:** Triage  
+**Status:** Done  
 **Type:** Feature
 
 **Description:**  
@@ -701,12 +701,12 @@ Create a `web/` project in the source tree for the project website hosted via Gi
 
 **Requirements:**
 
-- [ ] Pin Node.js version in root `.nvmrc` and migrate `gui/` and `web/` to Yarn Berry (`nodeLinker: node-modules`) with shared React 19, Vite, TypeScript, and Tailwind CSS tooling
-- [ ] Scaffold `web/` React + Tailwind CSS project configured for GitHub Pages base path (`/NextcloudUploadTool/`) and URL (`https://headhunter45.github.io/NextcloudUploadTool`)
-- [ ] Capture screenshots and animated GIFs of the GUI application workflows (upload queue, drag-and-drop, progress bars, account management) and embed them in the website and documentation
-- [ ] Create landing/marketing presentation page highlighting key CLI and GUI features, screenshots/GIF walkthroughs, and latest release download links and version metadata
-- [ ] Integrate project documentation (`docs/cli-reference.md`, `docs/automation-recipes.md`, `docs/installation.md`, `docs/gui-guide.md`, `docs/multi-account.md`, `docs/architecture.md`) and usage examples into the React site
-- [ ] Update CI/release scripts and workflows to use Yarn Berry for `gui/` and `web/` builds
+- [x] Pin Node.js version in root `.nvmrc` and migrate `gui/` and `web/` to Yarn Berry (`nodeLinker: node-modules`) with shared React 19, Vite, TypeScript, and Tailwind CSS tooling
+- [x] Scaffold `web/` React + Tailwind CSS project configured for GitHub Pages base path (`/NextcloudUploadTool/`) and URL (`https://headhunter45.github.io/NextcloudUploadTool`)
+- [x] Capture screenshots and animated GIFs of the GUI application workflows (upload queue, drag-and-drop, progress bars, account management) and embed them in the website and documentation
+- [x] Create landing/marketing presentation page highlighting key CLI and GUI features, screenshots/GIF walkthroughs, and latest release download links and version metadata
+- [x] Integrate project documentation (`docs/cli-reference.md`, `docs/automation-recipes.md`, `docs/installation.md`, `docs/gui-guide.md`, `docs/multi-account.md`, `docs/architecture.md`) and usage examples into the React site
+- [x] Update CI/release scripts and workflows to use Yarn Berry for `gui/` and `web/` builds
 
 **Dependencies:**
 

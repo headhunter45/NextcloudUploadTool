@@ -8,11 +8,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 GUI_DIR="${ROOT_DIR}/gui"
 
-echo "==> Building frontend assets..."
+echo "==> Installing and building frontend assets with Yarn Berry..."
 cd "${GUI_DIR}"
-npm run build
+yarn install --immutable
+yarn build
 
 echo "==> Packaging native desktop bundle with Tauri..."
-npm run tauri build
+yarn tauri build
 
 echo "✓ Native desktop bundle packaged in: ${GUI_DIR}/src-tauri/target/release/bundle/"

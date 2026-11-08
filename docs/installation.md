@@ -82,16 +82,16 @@ Download pre-built releases for your operating system from the [Releases](https:
 
 ### Prerequisites
 - **Rust toolchain** (1.75+): Install via `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
-- **Node.js** (v20+) and **npm** (for GUI frontend build)
+- **Node.js** (v20, pinned in `.nvmrc`) and **Yarn Berry** (`corepack enable`)
 - **Platform Development Libraries**:
-  - **Linux**: `sudo apt-get install libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev libssl-dev patchelf`
+  - **Linux**: `sudo apt-get install libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libssl-dev libdbus-1-dev pkg-config patchelf`
   - **macOS**: Xcode Command Line Tools (`xcode-select --install`)
   - **Windows**: Visual Studio C++ Build Tools
 
 ### Build the CLI (`nut`)
 ```bash
-git clone https://github.com/majinnaibu/nextcloud-upload-tool.git
-cd nextcloud-upload-tool
+git clone https://github.com/headhunter45/NextcloudUploadTool.git
+cd NextcloudUploadTool
 
 cargo build --release -p nut
 # The binary is placed at target/release/nut
@@ -100,8 +100,9 @@ cargo build --release -p nut
 ### Build the Desktop GUI
 ```bash
 cd gui
-npm install
-npm run build
-npm run tauri build
+corepack enable
+yarn install
+yarn build
+yarn tauri build
 # The packaged bundle is located in gui/src-tauri/target/release/bundle/
 ```
