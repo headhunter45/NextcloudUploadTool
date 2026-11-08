@@ -1,0 +1,20 @@
+services:
+  nextcloud-test:
+    image: ${NEXTCLOUD_TEST_IMAGE:-nextcloud:stable-apache}
+    container_name: ${NEXTCLOUD_TEST_CONTAINER:-nut-nextcloud-test}
+    ports:
+      - "127.0.0.1:${NEXTCLOUD_TEST_PORT:-8088}:80"
+    environment:
+      NEXTCLOUD_ADMIN_USER: ${NEXTCLOUD_TEST_USER:-admin}
+      NEXTCLOUD_ADMIN_PASSWORD: ${NEXTCLOUD_TEST_PASS:-AdminTestPass!2026}
+      NEXTCLOUD_TRUSTED_DOMAINS: "localhost 127.0.0.1:${NEXTCLOUD_TEST_PORT:-8088} nextcloud-test"
+      SQLITE_DATABASE: nextcloud_test
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSL http://127.0.0.1/status.php | grep -q '\"installed\":true'"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+

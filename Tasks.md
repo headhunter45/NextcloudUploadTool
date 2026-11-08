@@ -70,11 +70,10 @@ This document defines the complete project roadmap and task tracking system for 
 
 ## Tasks Summary (Rendered from task-details)
 
-| ID                  | Title                                                                      | Status | Type        |
-| ------------------- | -------------------------------------------------------------------------- | ------ | ----------- |
-| [NUT-024](#nut-024) | Create Docker/Podman Nextcloud Integration Test Harness                    | Triage | Foundation  |
-| [NUT-026](#nut-026) | Build React Documentation & Marketing Website on GitHub Pages              | Triage | Feature     |
-| [NUT-027](#nut-027) | Configure GitHub Pages Deployment Workflow on develop Branch Updates       | Triage | Chore       |
+| ID                  | Title                                                                      | Status      | Type        |
+| ------------------- | -------------------------------------------------------------------------- | ----------- | ----------- |
+| [NUT-026](#nut-026) | Build React Documentation & Marketing Website on GitHub Pages              | Triage      | Feature     |
+| [NUT-027](#nut-027) | Configure GitHub Pages Deployment Workflow on develop Branch Updates       | Triage      | Chore       |
 | [NUT-001](#nut-001) | Establish Repository Structure                                             | Done   | Foundation  |
 | [NUT-002](#nut-002) | Implement Shared Rust Backend Library                                      | Done   | Foundation  |
 | [NUT-003](#nut-003) | Implement WebDAV Upload Logic                                              | Done   | Feature     |
@@ -98,6 +97,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-021](#nut-021) | Support Headless & SSH Remote Authentication Modes                         | Done   | Feature     |
 | [NUT-022](#nut-022) | Implement CLI Shell Completions Generation                                 | Done   | Feature     |
 | [NUT-023](#nut-023) | Write Comprehensive CLI Documentation and Automation Guides                | Done   | Chore       |
+| [NUT-024](#nut-024) | Create Docker/Podman Nextcloud Integration Test Harness                    | Done   | Foundation  |
 | [NUT-025](#nut-025) | Optimize CI Workflow with Fast-Forward Commit Reuse and Git Notes Metadata | Done   | Chore       |
 
 ---
@@ -638,12 +638,12 @@ Write dedicated CLI reference documentation and practical automation guides for 
 - NUT-011
 - NUT-021
 
-<a id="nut-024" class="task" data-status="triage" data-task-type="foundation"></a>
+<a id="nut-024" class="task" data-status="done" data-task-type="foundation"></a>
 
 ### Create Docker/Podman Nextcloud Integration Test Harness
 
 **ID:** NUT-024  
-**Status:** Triage  
+**Status:** Done  
 **Type:** Foundation
 
 **Description:**  
@@ -651,11 +651,11 @@ Create a containerized integration test harness using Docker or Podman to spin u
 
 **Requirements:**
 
-- [ ] Provide setup script (`scripts/test-server-up.sh`) using Docker/Podman compose to launch and initialize a fresh Nextcloud container
-- [ ] Automatically configure admin user credentials, disable password expiration, and establish app password / token
-- [ ] Provide teardown script (`scripts/test-server-down.sh`) for clean container and volume disposal
-- [ ] Implement Rust integration test suite (`tests/cli_integration.rs` or `cli/tests/`) running real CLI uploads, folder creations, stdin streams, and public share link verifications
-- [ ] Support automated CI/CD execution of the integration harness
+- [x] Provide setup script (`scripts/test-server-up.sh`) using Docker/Podman compose to launch and initialize a fresh Nextcloud container
+- [x] Automatically configure admin user credentials, disable password expiration, and establish app password / token
+- [x] Provide teardown script (`scripts/test-server-down.sh`) for clean container and volume disposal
+- [x] Implement Rust integration test suite (`tests/cli_integration.rs` or `cli/tests/`) running real CLI uploads, folder creations, stdin streams, and public share link verifications
+- [x] Support automated CI/CD execution of the integration harness
 
 **Dependencies:**
 

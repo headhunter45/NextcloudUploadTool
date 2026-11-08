@@ -1,0 +1,39 @@
+name: Nextcloud Integration Tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: ["main", "staging", "develop"]
+    paths:
+      - "nextcloud_client/**"
+      - "cli/**"
+      - "docker-compose.test.yml"
+      - "scripts/test-server-up.sh"
+      - "scripts/test-server-down.sh"
+      - "scripts/run-integration-tests.sh"
+      - ".github/workflows/integration.yml"
+
+jobs:
+  integration:
+    name: Containerized Nextcloud CLI E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Rust cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libdbus-1-dev pkg-config libssl-dev
+
+      - name: Run Containerized Nextcloud Integration Harness
+        run: ./scripts/run-integration-tests.sh
+

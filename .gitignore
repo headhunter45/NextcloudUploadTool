@@ -42,3 +42,4 @@ Thumbs.db
 .env.*
 *.local
 .worktrees
+.nextcloud-test.env

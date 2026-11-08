@@ -77,8 +77,28 @@ impl StoredAccount {
 pub struct CredentialStore;
 
 impl CredentialStore {
+    /// Returns true if OS keyring usage should be bypassed (e.g., when `NUT_CONFIG_DIR` or
+    /// `NUT_DISABLE_KEYRING` is set for isolated testing/CI environments).
+    fn use_keyring() -> bool {
+        std::env::var_os("NUT_CONFIG_DIR").is_none()
+            && std::env::var_os("NUT_DISABLE_KEYRING").is_none()
+    }
+
     /// Get the configuration directory path for NUT.
     pub fn config_dir() -> Result<PathBuf> {
+        if let Ok(custom_dir) = std::env::var("NUT_CONFIG_DIR") {
+            let trimmed = custom_dir.trim();
+            if !trimmed.is_empty() {
+                let app_dir = PathBuf::from(trimmed);
+                if !app_dir.exists() {
+                    fs::create_dir_all(&app_dir).map_err(|e| {
+                        NextcloudError::Other(format!("Failed to create config directory: {e}"))
+                    })?;
+                }
+                return Ok(app_dir);
+            }
+        }
+
         let base = dirs::config_dir()
             .or_else(dirs::home_dir)
             .ok_or_else(|| NextcloudError::Other("Could not determine user config directory".into()))?;
@@ -138,18 +158,20 @@ impl CredentialStore {
         let keyring_key = account.keyring_key();
 
         // 1. Attempt retrieval from OS Keyring (using full id username@host)
-        if let Ok(entry) = Entry::new(KEYRING_SERVICE_NAME, keyring_key) {
-            if let Ok(password) = entry.get_password() {
-                let username = account.username.clone();
-                return Ok(Some((account, AccountCredentials::new(username, password))));
+        if Self::use_keyring() {
+            if let Ok(entry) = Entry::new(KEYRING_SERVICE_NAME, keyring_key) {
+                if let Ok(password) = entry.get_password() {
+                    let username = account.username.clone();
+                    return Ok(Some((account, AccountCredentials::new(username, password))));
+                }
             }
-        }
 
-        // Also try retrieval by username alone (if previously stored with just username)
-        if let Ok(entry) = Entry::new(KEYRING_SERVICE_NAME, &account.username) {
-            if let Ok(password) = entry.get_password() {
-                let username = account.username.clone();
-                return Ok(Some((account, AccountCredentials::new(username, password))));
+            // Also try retrieval by username alone (if previously stored with just username)
+            if let Ok(entry) = Entry::new(KEYRING_SERVICE_NAME, &account.username) {
+                if let Ok(password) = entry.get_password() {
+                    let username = account.username.clone();
+                    return Ok(Some((account, AccountCredentials::new(username, password))));
+                }
             }
         }
 
@@ -239,10 +261,13 @@ impl CredentialStore {
 
         // Try storing password in OS Keyring
         let mut fallback_password = None;
-        let entry_res = Entry::new(KEYRING_SERVICE_NAME, new_account.keyring_key());
-        let keyring_saved = match entry_res {
-            Ok(ref entry) => entry.set_password(app_password).is_ok(),
-            Err(_) => false,
+        let keyring_saved = if Self::use_keyring() {
+            match Entry::new(KEYRING_SERVICE_NAME, new_account.keyring_key()) {
+                Ok(ref entry) => entry.set_password(app_password).is_ok(),
+                Err(_) => false,
+            }
+        } else {
+            false
         };
 
         if !keyring_saved {
@@ -276,8 +301,10 @@ impl CredentialStore {
 
         if let Some(acc) = target {
             // Delete from OS Keyring
-            if let Ok(entry) = Entry::new(KEYRING_SERVICE_NAME, acc.keyring_key()) {
-                let _ = entry.delete_credential();
+            if Self::use_keyring() {
+                if let Ok(entry) = Entry::new(KEYRING_SERVICE_NAME, acc.keyring_key()) {
+                    let _ = entry.delete_credential();
+                }
             }
 
             accounts.retain(|a| a.id != acc.id);
