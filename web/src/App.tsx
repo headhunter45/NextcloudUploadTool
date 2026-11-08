@@ -4,7 +4,7 @@ import {
   fetchLatestReleaseMetadata,
   ReleaseMetadata,
 } from "./releases";
-import { DOC_PAGES } from "./docsContent";
+import { DOC_PAGES, PACKAGE_MANAGER_FLAGS } from "./docsContent";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 
 type ShowcaseSlideId =
@@ -74,7 +74,7 @@ export function App() {
   const [activeSlide, setActiveSlide] = useState<ShowcaseSlideId>("upload-gif");
   const [installMethod, setInstallMethod] = useState<
     "homebrew" | "winget" | "curl" | "aur" | "cargo"
-  >("homebrew");
+  >(PACKAGE_MANAGER_FLAGS.homebrew ? "homebrew" : "curl");
   const [osTab, setOsTab] = useState<"macos" | "linux" | "windows">("macos");
 
   // Interactive CLI command builder state
@@ -334,13 +334,15 @@ export function App() {
                 <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Package manager tabs">
                   {(
                     [
-                      ["homebrew", "Homebrew"],
-                      ["winget", "Winget / Choco"],
-                      ["curl", "Static Binary"],
-                      ["aur", "Arch AUR"],
-                      ["cargo", "Cargo"],
+                      ["homebrew", "Homebrew", PACKAGE_MANAGER_FLAGS.homebrew],
+                      ["winget", "Winget / Choco", PACKAGE_MANAGER_FLAGS.winget],
+                      ["curl", "Static Binary", true],
+                      ["aur", "Arch AUR", PACKAGE_MANAGER_FLAGS.aur],
+                      ["cargo", "Cargo", true],
                     ] as const
-                  ).map(([key, label]) => (
+                  )
+                    .filter(([, , enabled]) => enabled)
+                    .map(([key, label]) => (
                     <button
                       key={key}
                       type="button"
