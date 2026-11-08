@@ -1,0 +1,112 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - develop
+    tags:
+      - 'v*'
+      - '!*-dev*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 0.1.0). If omitted, inferred from latest GitHub Release or git tag.'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+jobs:
+  build-pages:
+    name: Build Website (Yarn Berry)
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.resolve_version.outputs.version }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js from .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable Corepack (Yarn Berry)
+        run: corepack enable
+
+      - name: Resolve Latest Release Version & Metadata
+        id: resolve_version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION=""
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [[ "${GITHUB_REF:-}" =~ ^refs/tags/v[0-9] ]] && [[ "${GITHUB_REF_NAME:-}" != *-dev* ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            LATEST_RELEASE_TAG="$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq '.tag_name' 2>/dev/null || true)"
+            if [ -n "${LATEST_RELEASE_TAG}" ] && [[ "${LATEST_RELEASE_TAG}" != "null" ]] && [[ "${LATEST_RELEASE_TAG}" != *-dev* ]]; then
+              VERSION="${LATEST_RELEASE_TAG#v}"
+            fi
+          fi
+
+          if [ -z "${VERSION}" ]; then
+            GIT_TAG="$(git tag --merged HEAD --list 'v*' --sort=-v:refname | grep -v -- '-dev' | head -n 1 || true)"
+            if [ -n "${GIT_TAG}" ]; then
+              VERSION="${GIT_TAG#v}"
+            else
+              VERSION="0.1.0"
+            fi
+          fi
+
+          VERSION="${VERSION#v}"
+          VERSION="${VERSION%-dev*}"
+
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "VITE_NUT_VERSION=${VERSION}" >> "${GITHUB_ENV}"
+          echo "VITE_GITHUB_REPO=${GITHUB_REPOSITORY}" >> "${GITHUB_ENV}"
+          echo "Resolved release version for GitHub Pages build: v${VERSION} (repo: ${GITHUB_REPOSITORY})"
+
+      - name: Install web dependencies with Yarn Berry
+        working-directory: web
+        run: yarn install --immutable
+
+      - name: Build static React + Tailwind site
+        working-directory: web
+        env:
+          VITE_NUT_VERSION: ${{ steps.resolve_version.outputs.version }}
+          VITE_GITHUB_REPO: ${{ github.repository }}
+        run: |
+          yarn build
+          touch dist/.nojekyll
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy-pages:
+    name: Deploy to GitHub Pages
+    needs: build-pages
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

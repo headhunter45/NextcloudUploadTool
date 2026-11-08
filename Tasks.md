@@ -72,7 +72,6 @@ This document defines the complete project roadmap and task tracking system for 
 
 | ID                  | Title                                                                      | Status      | Type        |
 | ------------------- | -------------------------------------------------------------------------- | ----------- | ----------- |
-| [NUT-027](#nut-027) | Configure GitHub Pages Deployment Workflow on develop Branch Updates       | Triage      | Chore       |
 | [NUT-001](#nut-001) | Establish Repository Structure                                             | Done   | Foundation  |
 | [NUT-002](#nut-002) | Implement Shared Rust Backend Library                                      | Done   | Foundation  |
 | [NUT-003](#nut-003) | Implement WebDAV Upload Logic                                              | Done   | Feature     |
@@ -99,6 +98,7 @@ This document defines the complete project roadmap and task tracking system for 
 | [NUT-024](#nut-024) | Create Docker/Podman Nextcloud Integration Test Harness                    | Done   | Foundation  |
 | [NUT-025](#nut-025) | Optimize CI Workflow with Fast-Forward Commit Reuse and Git Notes Metadata | Done   | Chore       |
 | [NUT-026](#nut-026) | Build React Documentation & Marketing Website on GitHub Pages              | Done   | Feature     |
+| [NUT-027](#nut-027) | Configure GitHub Pages Deployment Workflow on develop Branch Updates       | Done   | Chore       |
 
 ---
 
@@ -714,12 +714,12 @@ Create a `web/` project in the source tree for the project website hosted via Gi
 - NUT-020
 - NUT-023
 
-<a id="nut-027" class="task" data-status="triage" data-task-type="chore"></a>
+<a id="nut-027" class="task" data-status="done" data-task-type="chore"></a>
 
 ### Configure GitHub Pages Deployment Workflow on develop Branch Updates
 
 **ID:** NUT-027  
-**Status:** Triage  
+**Status:** Done  
 **Type:** Chore
 
 **Description:**  
@@ -727,11 +727,11 @@ Create a GitHub Actions GitHub Pages deployment workflow (modeled after `OpenTas
 
 **Requirements:**
 
-- [ ] Trigger GitHub Pages build and deployment on pushes to `develop`, release tags (`v*`, `!*-dev*`), and `workflow_dispatch` (with optional `version` input)
-- [ ] Configure GitHub Pages workflow permissions (`contents: write`, `pages: write`, `id-token: write`) and concurrency control (`group: 'pages'`, `cancel-in-progress: false`)
-- [ ] Setup Node.js from root `.nvmrc` with Corepack / Yarn Berry enabled and resolve the latest published release version and download URLs (from GitHub Releases API / release tag / ancestor `v*` git tag)
-- [ ] Build `web/` (`yarn build`) with the latest release version and asset download links injected into the React build and upload `web/dist` via `actions/upload-pages-artifact@v3`
-- [ ] Deploy the uploaded artifact to the `github-pages` environment via `actions/deploy-pages@v4`
+- [x] Trigger GitHub Pages build and deployment on pushes to `develop`, release tags (`v*`, `!*-dev*`), and `workflow_dispatch` (with optional `version` input)
+- [x] Configure GitHub Pages workflow permissions (`contents: write`, `pages: write`, `id-token: write`) and concurrency control (`group: 'pages'`, `cancel-in-progress: false`)
+- [x] Setup Node.js from root `.nvmrc` with Corepack / Yarn Berry enabled and resolve the latest published release version and download URLs (from GitHub Releases API / release tag / ancestor `v*` git tag)
+- [x] Build `web/` (`yarn build`) with the latest release version and asset download links injected into the React build and upload `web/dist` via `actions/upload-pages-artifact@v3`
+- [x] Deploy the uploaded artifact to the `github-pages` environment via `actions/deploy-pages@v4`
 
 **Dependencies:**
 
